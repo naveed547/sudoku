@@ -1,0 +1,81 @@
+# Sudoku CLI (Java + Maven)
+
+Interactive 9x9 Sudoku game played in the terminal.
+
+## How it works
+- The game generates a full valid solution and then removes cells to create a puzzle.
+- Prefilled cells are **fixed**.
+- User moves are **accepted** (including moves that create duplicates).
+- Rule violations (row/column/3x3 box duplicates, and incomplete/invalid board) are reported when you run **`check`**.
+
+## Prerequisites
+- Java 11+
+- Maven 3+
+
+## Standard build / test / run
+All commands use Maven (company standard):
+
+### Test
+```bash
+mvn test
+```
+
+### Build (fat/shaded jar)
+```bash
+mvn clean package -DskipTests=true
+```
+
+### Run
+```bash
+java -jar target/sudoku-1.0.0-shaded.jar
+```
+
+
+## Commands
+```text
+A3 5       Place value 5 at cell A3 (unless the cell is prefilled)
+clear A3  Clear cell A3 (only if non-prefilled)
+hint       Fill one empty non-prefilled cell with its solution value
+check      Scan the current grid and report rule violations
+help       Print command help
+quit       Exit the game
+```
+
+## Example
+```text
+Enter command (eg: A3 4 , clear C5 , hint , check , quit):
+```
+
+## Tests
+Run all unit tests:
+```bash
+mvn test
+```
+
+## Project layout
+```text
+src/main/java/com/example/sudoku/
+  Board.java
+  SudokuGame.java
+  commands/
+    Command.java
+    CommandFactory.java
+    PlaceCommand.java
+    ClearCommand.java
+    HintCommand.java
+    CheckCommand.java
+    HelpCommand.java
+    QuitCommand.java
+    UnknownCommand.java
+  utils/
+    SudokuUtils.java
+    SudokuGenerator.java
+
+src/test/java/com/example/sudoku/
+  BoardTest.java
+  commands/*Test.java
+```
+
+## License
+MIT (see `LICENSE`).
+
