@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "tasks": {
+    "mvn:test": "mvn test -q",
+    "mvn:package": "mvn clean package -q",
+    "app:run": "java -jar target\\sudoku-1.0.0-shaded.jar",
+    "app:debug_jdwp": "java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005 -jar target\\sudoku-1.0.0-shaded.jar"
+  },
+  "notes": "This file is a quick reference. For actual one-click buttons in VS Code, use .vscode/tasks.json and .vscode/launch.json created separately."
+}
+

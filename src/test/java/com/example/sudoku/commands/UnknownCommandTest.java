@@ -1,10 +1,11 @@
 package com.example.sudoku.commands;
 
-import com.example.sudoku.Board;
 import org.junit.jupiter.api.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import static org.junit.jupiter.api.Assertions.*;
+import com.example.sudoku.Board;
+
 
 public class UnknownCommandTest {
     

@@ -1,51 +1,81 @@
-# Sudoku CLI Game
+# Sudoku CLI (Java + Maven)
 
-Production-ready Java Maven Sudoku game with backtracking generator, validation, hints, and interactive CLI.
+Interactive 9x9 Sudoku game played in the terminal.
 
-## Features
-- Interactive puzzle solving with commands: `A3 5` (place), `C5 clear`, `hint`, `check`, `quit`
-- Generates unique solvable puzzles with ~30 prefilled cells
-- Full validation for rows, columns, 3x3 boxes
-- Prefilled cells fixed; invalid moves prevented
-- Logging with SLF4J/Logback
+## How it works
+- The game generates a full valid solution and then removes cells to create a puzzle.
+- Prefilled cells are **fixed**.
+- User moves are **accepted** (including moves that create duplicates).
+- Rule violations (row/column/3x3 box duplicates, and incomplete/invalid board) are reported when you run **`check`**.
 
-## Build & Run
-**Windows:** Double-click `build-run.bat` (kills locks, builds, runs).  
+## Prerequisites
+- Java 11+
+- Maven 3+
 
-**Or manual:**
-```powershell
-taskkill /f /im java.exe 2>$null ; Remove-Item -Recurse -Force target -ErrorAction SilentlyContinue ; mvn clean package
+## Standard build / test / run
+All commands use Maven (company standard):
+
+### Test
+```bash
+mvn test
 ```
-Builds `target/sudoku-1.0.0-shaded.jar`.
 
-## Run the game
+### Build (fat/shaded jar)
+```bash
+mvn clean package -DskipTests=true
+```
+
+### Run
 ```bash
 java -jar target/sudoku-1.0.0-shaded.jar
 ```
 
-Example board display:
-```
-   1 2 3 | 4 5 6 | 7 8 9 
-A  _ _ 8 | 1 _ _ | _ _ _  A
-B  6 _ _ | _ 7 8 | _ _ _  B
-C  _ _ _ | 6 _ _ | _ _ _  C
-   ------+-------+------
-... (Prefilled cells are fixed)
+
+## Commands
+```text
+A3 5       Place value 5 at cell A3 (unless the cell is prefilled)
+clear A3  Clear cell A3 (only if non-prefilled)
+hint       Fill one empty non-prefilled cell with its solution value
+check      Scan the current grid and report rule violations
+help       Print command help
+quit       Exit the game
 ```
 
-Commands:
-- `A3 4` → Place 4 at A3 (if valid)
-- `B2 clear` → Clear B2 (non-prefilled only)
-- `hint` → Reveal random empty cell
-- `check` → Validate current board
-- `quit` → Exit
+## Example
+```text
+Enter command (eg: A3 4 , clear C5 , hint , check , quit):
+```
 
-## Development
-- Java 11+
-- Maven 3+
-- Tests: `mvn test`
-- Logging config: `src/main/resources/logback.xml` (optional)
+## Tests
+Run all unit tests:
+```bash
+mvn test
+```
+
+## Project layout
+```text
+src/main/java/com/example/sudoku/
+  Board.java
+  SudokuGame.java
+  commands/
+    Command.java
+    CommandFactory.java
+    PlaceCommand.java
+    ClearCommand.java
+    HintCommand.java
+    CheckCommand.java
+    HelpCommand.java
+    QuitCommand.java
+    UnknownCommand.java
+  utils/
+    SudokuUtils.java
+    SudokuGenerator.java
+
+src/test/java/com/example/sudoku/
+  BoardTest.java
+  commands/*Test.java
+```
 
 ## License
-MIT License - see LICENSE file.
+MIT (see `LICENSE`).
 

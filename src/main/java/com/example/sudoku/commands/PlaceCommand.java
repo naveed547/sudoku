@@ -1,9 +1,10 @@
 package com.example.sudoku.commands;
 
-import com.example.sudoku.Board;
-import com.example.sudoku.Command;
-import com.example.sudoku.utils.SudokuUtils;
 import java.util.Scanner;
+
+import com.example.sudoku.Board;
+import com.example.sudoku.utils.SudokuUtils;
+
 
 public class PlaceCommand implements Command {
     private final String cell;
@@ -18,31 +19,33 @@ public class PlaceCommand implements Command {
     public boolean execute(Board board, int[][] solution, Scanner sc) {
         int[] rc = SudokuUtils.parseCell(cell);
         if (rc == null) {
-            System.out.println("Invalid cell reference.");
+            System.out.println("\nInvalid cell reference.\n");
             return true;
         }
         int r = rc[0], c = rc[1];
         if (board.isPrefilled(r, c)) {
-            System.out.println("Cannot modify a prefilled cell.");
+            System.out.println("\nCannot modify a prefilled cell.\n");
             return true;
         }
+
         int val;
         try {
             val = Integer.parseInt(valueToken);
         } catch (NumberFormatException e) {
-            System.out.println("Second token must be a number 1-9.");
+            System.out.println("\nSecond token must be a number 1-9.\n");
             return true;
         }
+
         if (val < 1 || val > 9) {
-            System.out.println("Number must be between 1 and 9.");
+            System.out.println("\nNumber must be between 1 and 9.\n");
             return true;
         }
-        if (!SudokuUtils.isValidMove(board.toArrayCopy(), r, c, val)) {
-            System.out.println("Invalid move: would create a duplicate in row, column, or 3x3 box.");
-            return true;
-        }
+
+        // Accept the move even if it creates a rule violation.
+        // The player will learn/see violations when they run `check`.
         board.set(r, c, val);
-        System.out.println("Placed " + val + " at " + cell.toUpperCase());
+        System.out.println("\nPlaced " + val + " at " + cell.toUpperCase() + "\n");
         return true;
     }
 }
+

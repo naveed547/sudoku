@@ -1,9 +1,9 @@
 package com.example.sudoku.commands;
 
-import com.example.sudoku.commands.Command;
+import java.util.Scanner;
 import com.example.sudoku.Board;
 import com.example.sudoku.utils.SudokuUtils;
-import java.util.Scanner;
+
 
 public class ClearCommand implements Command {
     private final String cell;
@@ -29,7 +29,8 @@ public class ClearCommand implements Command {
             return true;
         }
         board.clear(r, c);
-        System.out.printf("\nCleared %s%n\n", cell.toUpperCase());
+        System.out.println("\nCleared " + cell.toUpperCase() + "\n");
         return true;
     }
 }
+

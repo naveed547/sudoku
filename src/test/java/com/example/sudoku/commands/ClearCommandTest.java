@@ -1,13 +1,15 @@
 package com.example.sudoku.commands;
 
-import com.example.sudoku.Board;
-import com.example.sudoku.SudokuGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import java.util.Random;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.Random;
 import static org.junit.jupiter.api.Assertions.*;
+import com.example.sudoku.commands.ClearCommand;
+import com.example.sudoku.Board;
+import com.example.sudoku.utils.SudokuGenerator;
+
 
 public class ClearCommandTest {
     private Board board;

@@ -1,8 +1,9 @@
 package com.example.sudoku.commands;
 
-import com.example.sudoku.Board;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import com.example.sudoku.Board;
+
 
 public class QuitCommandTest {
     

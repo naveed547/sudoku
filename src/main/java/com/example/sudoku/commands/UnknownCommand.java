@@ -1,8 +1,8 @@
 package com.example.sudoku.commands;
 
-import com.example.sudoku.commands.Command;
-import com.example.sudoku.Board;
 import java.util.Scanner;
+import com.example.sudoku.Board;
+
 
 public class UnknownCommand implements Command {
     @Override
@@ -11,3 +11,4 @@ public class UnknownCommand implements Command {
         return true;
     }
 }
+

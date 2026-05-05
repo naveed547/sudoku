@@ -1,7 +1,8 @@
 package com.example.sudoku.utils;
 
-import com.example.sudoku.Board;
 import java.util.*;
+import com.example.sudoku.Board;
+
 
 /**
  * Utility functions for Sudoku logic: validation, move checks, parsing.

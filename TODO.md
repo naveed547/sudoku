@@ -1,15 +1,9 @@
-# TODO: Command Pattern Refactor
+# README Update Task
 
-## Plan Approved
-- Command interface
-- Concrete Commands (Quit, Hint, Check, Clear, Place, Unknown, Help)
-- CommandFactory.parse()
-- SudokuGame as invoker
+## Steps
+- [x] 1. Create this TODO.md ✅
+- [x] 2. Update README.md with Recent Changes section ✅
+- [ ] 3. Run `mvn clean test` to verify tests post-import organization
+- [x] 4. Update TODO.md with progress ✅
 
-## Steps:
-- [ ] Create Command.java interface
-- [ ] Create concrete Command classes
-- [ ] Create CommandFactory.java
-- [ ] Refactor SudokuGame.start() to use CommandFactory + loop
-- [ ] Update tests if needed
-- [ ] Test mvn clean package + run
+**Recent:** Standardised build/test/run where possible (Maven + shaded jar). Fixed HintCommand to use the provided Random. Tests verified via `mvn test` (Maven clean can intermittently fail due to Windows target deletion locking).

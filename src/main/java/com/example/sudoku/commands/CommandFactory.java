@@ -1,15 +1,14 @@
 package com.example.sudoku.commands;
 
-import com.example.sudoku.Board;
-import com.example.sudoku.commands.Command;
-import java.util.Random;
 import java.util.Scanner;
+import com.example.sudoku.Board;
+
 
 /**
  * Factory for creating Command instances from user input strings.
  */
 public class CommandFactory {
-    public static Command parse(String line, Board board, int[][] solution, Scanner sc, Random rand) {
+    public static Command parse(String line, Board board, int[][] solution, Scanner sc) {
         String[] parts = line.trim().split("\\s+");
         if (parts.length == 0) {
             return new UnknownCommand();

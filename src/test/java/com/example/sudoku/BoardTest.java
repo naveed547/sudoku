@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.*;
 
+
 public class BoardTest {
     @Test
     void setGetAndClearWorks() {
@@ -30,10 +31,9 @@ public class BoardTest {
     void getEmptyNonPrefilledCells_returnsOnlyNonPrefilledEmpties() {
         Board b = new Board();
         b.set(0,0,1);
-        b.setPrefilled(0,0, true);
+        b.markPrefilledFromBoard();
         // place a non-prefilled value
         b.set(0,1,2);
-        b.setPrefilled(0,1, false);
         // clear one cell
         b.clear(1,1);
         List<int[]> empties = b.getEmptyNonPrefilledCells();

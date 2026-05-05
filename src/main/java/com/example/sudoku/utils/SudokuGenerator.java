@@ -1,7 +1,8 @@
 package com.example.sudoku.utils;
 
-import com.example.sudoku.Board;
 import java.util.*;
+import com.example.sudoku.Board;
+
 
 /**
  * Responsible for generating a full Sudoku solution and turning it into a puzzle

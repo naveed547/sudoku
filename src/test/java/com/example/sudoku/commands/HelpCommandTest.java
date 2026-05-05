@@ -1,10 +1,11 @@
 package com.example.sudoku.commands;
 
-import com.example.sudoku.Board;
 import org.junit.jupiter.api.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import static org.junit.jupiter.api.Assertions.*;
+import com.example.sudoku.Board;
+
 
 public class HelpCommandTest {
     private ByteArrayOutputStream outContent;
@@ -22,12 +23,12 @@ public class HelpCommandTest {
         
         // Then comprehensive help text shown
         String output = outContent.toString();
-        assertTrue(output.contains("Commands") || output.contains("Available"));
-        assertTrue(output.contains("place") || output.contains("A1 5"));
-        assertTrue(output.contains("clear") || output.contains("A1 clear"));
+        assertTrue(output.contains("Commands:"));
+        assertTrue(output.contains("A3 5"));
+        assertTrue(output.contains("A3 clear"));
         assertTrue(output.contains("hint"));
         assertTrue(output.contains("check"));
-        assertTrue(output.contains("quit") || output.contains("exit"));
+        assertTrue(output.contains("quit"));
         assertTrue(output.contains("help"));
     }
 

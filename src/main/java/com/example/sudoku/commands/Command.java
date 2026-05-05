@@ -1,7 +1,8 @@
 package com.example.sudoku.commands;
 
-import com.example.sudoku.Board;
 import java.util.Scanner;
+import com.example.sudoku.Board;
+
 
 /**
  * Interface for all Sudoku commands.

@@ -1,13 +1,15 @@
 package com.example.sudoku.commands;
 
-import com.example.sudoku.Board;
-import com.example.sudoku.SudokuGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import java.util.Random;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.Random;
 import static org.junit.jupiter.api.Assertions.*;
+import com.example.sudoku.commands.PlaceCommand;
+import com.example.sudoku.Board;
+import com.example.sudoku.utils.SudokuGenerator;
+
 
 public class PlaceCommandTest {
     private Board board;
@@ -81,16 +83,18 @@ public class PlaceCommandTest {
     }
 
     @Test
-    void placeCommand_whenDuplicateMove_thenRejects() {
+    void placeCommand_whenDuplicateMove_thenAcceptsButCheckWillReport() {
         // Given same number already in row
         board.set(0, 1, 5);
         PlaceCommand cmd = new PlaceCommand("A1", "5");
-        
+
         // When executed
-        cmd.execute(board, solution, null);
-        
-        // Then rejected, no change
-        assertTrue(outContent.toString().contains("Invalid move"));
-        assertEquals(0, board.get(0, 0));
+        boolean continueGame = cmd.execute(board, solution, null);
+
+        // Then move is accepted; check is responsible for reporting violations
+        assertTrue(continueGame);
+        assertEquals(5, board.get(0, 0));
+        assertTrue(outContent.toString().contains("Placed 5 at A1"));
     }
+
 }
