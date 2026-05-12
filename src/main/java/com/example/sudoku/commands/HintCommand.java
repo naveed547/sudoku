@@ -7,7 +7,7 @@ import com.example.sudoku.Board;
 
 
 public class HintCommand implements Command {
-    // Random passed in - no static field needed
+    private static final Random RNG = new Random();
 
     @Override
     public boolean execute(Board board, int[][] solution, Scanner sc) {
@@ -16,7 +16,8 @@ public class HintCommand implements Command {
             System.out.println("\nNo available hints.\n");
             return true;
         }
-        int[] cell = empties.get(new Random().nextInt(empties.size()));
+        int[] cell = empties.get(HintCommand.RNG.nextInt(empties.size()));
+
 
 
         int r = cell[0], c = cell[1];

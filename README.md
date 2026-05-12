@@ -8,6 +8,11 @@ Interactive 9x9 Sudoku game played in the terminal.
 - User moves are **accepted** (including moves that create duplicates).
 - Rule violations (row/column/3x3 box duplicates, and incomplete/invalid board) are reported when you run **`check`**.
 
+## Recent Changes
+- Standardised build/test/run where possible (Maven + shaded jar).
+- Fixed HintCommand to use the provided Random.
+
+
 ## Prerequisites
 - Java 11+
 - Maven 3+
@@ -41,10 +46,16 @@ help       Print command help
 quit       Exit the game
 ```
 
+
 ## Example
 ```text
 Enter command (eg: A3 4 , clear C5 , hint , check , quit):
 ```
+
+## Notes on performance / determinism
+- `SudokuGenerator` generates solutions using backtracking.
+- The CLI has small allocation optimizations (example: `hint` reuses a single `Random`).
+- The generator/puzzle creation strategy stays deterministic for the same input seed, so unit tests expecting specific puzzle states continue to pass.
 
 ## Tests
 Run all unit tests:

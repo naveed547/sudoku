@@ -31,14 +31,10 @@ public class CommandFactory {
                 }
                 return new UnknownCommand();
             default:
-                if (parts.length >= 2) {
-                    try {
-                        Integer.parseInt(parts[1]);
-                        return new PlaceCommand(parts[0], parts[1]);
-                    } catch (NumberFormatException e) {
-                        // not place
-                    }
+                if (parts.length >= 2 && parts[1] != null && parts[1].matches("\\d+")) {
+                    return new PlaceCommand(parts[0], parts[1]);
                 }
+
                 return new UnknownCommand();
         }
     }

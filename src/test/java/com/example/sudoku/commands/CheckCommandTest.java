@@ -15,90 +15,92 @@ public class CheckCommandTest {
     private Board board;
     private Random rand;
     private ByteArrayOutputStream outContent;
+    private int[][] solution;
 
     @BeforeEach
     void setUp() {
         rand = new Random(42);
         outContent = new ByteArrayOutputStream();
         System.setOut(new PrintStream(outContent));
-        
+
         board = new Board();
         SudokuGenerator gen = new SudokuGenerator(rand);
-        int[][] solution = gen.generateFullSolution();
+        solution = gen.generateFullSolution();
         gen.createPuzzle(board, solution, 30);
     }
 
     @Test
     void checkCommand_whenNoDuplicates_thenShowsNoProblems() {
-        // Given puzzle state (generator may remove cells without guaranteeing uniqueness/solvability),
-        // but the `check` command should always report in the format it prints.
-        CheckCommand cmd = new CheckCommand();
+        // Given a fully valid solved board (no duplicates possible)
+        for (int r = 0; r < Board.SIZE; r++) {
+            for (int c = 0; c < Board.SIZE; c++) {
+                board.set(r, c, solution[r][c]);
+            }
+        }
 
+        CheckCommand cmd = new CheckCommand();
         cmd.execute(board, null, null);
 
         String output = outContent.toString();
-        assertTrue(output.contains("Problems" ) || output.contains("No rule violations" ) || output.contains("No duplicates"));
-
+        assertTrue(output.contains("No rule violations detected."), "Expected success message when there are no violations");
+        assertFalse(output.contains("Problems found:"), "Should not list problems when solved board is valid");
     }
 
     @Test
     void checkCommand_whenRowDuplicate_thenListsProblem() {
         // Given board with row duplicate
-        board.set(0,0, 1);
-        board.set(0,1, 1); // duplicate in row 0
+        board.set(0, 0, 1);
+        board.set(0, 1, 1); // duplicate in row 0
+
         CheckCommand cmd = new CheckCommand();
-        
-        // When executed
         cmd.execute(board, null, null);
-        
-        // Then lists the problem
+
         String output = outContent.toString();
-        assertTrue(output.contains("row") || output.contains("Row"));
+        assertTrue(output.contains("Problems found:"), "Expected problems header");
+        assertTrue(output.toLowerCase().contains("duplicate 1 in row"), "Expected row duplicate to be reported");
     }
 
     @Test
     void checkCommand_whenColumnDuplicate_thenListsProblem() {
         // Given board with column duplicate
-        board.set(0,0, 1);
-        board.set(1,0, 1); // duplicate in col 0
+        board.set(0, 0, 1);
+        board.set(1, 0, 1); // duplicate in col 0
+
         CheckCommand cmd = new CheckCommand();
-        
-        // When executed
         cmd.execute(board, null, null);
-        
-        // Then lists the problem
+
         String output = outContent.toString();
-        assertTrue(output.contains("column") || output.contains("Column"));
+        assertTrue(output.contains("Problems found:"), "Expected problems header");
+        assertTrue(output.toLowerCase().contains("duplicate 1 in column"), "Expected column duplicate to be reported");
     }
 
     @Test
     void checkCommand_whenBoxDuplicate_thenListsProblem() {
         // Given board with 3x3 box duplicate
-        board.set(0,0, 1);
-        board.set(1,1, 1); // same box
+        board.set(0, 0, 1);
+        board.set(1, 1, 1); // same box
+
         CheckCommand cmd = new CheckCommand();
-        
-        // When executed
         cmd.execute(board, null, null);
-        
-        // Then lists the problem
+
         String output = outContent.toString();
-        assertTrue(output.contains("box") || output.contains("Box"));
+        assertTrue(output.contains("Problems found:"), "Expected problems header");
+        assertTrue(output.toLowerCase().contains("duplicate 1 in 3x3 box"), "Expected box duplicate to be reported");
     }
 
     @Test
     void checkCommand_whenMultipleProblems_thenListsAll() {
-        // Given board with multiple issues
-        board.set(0,0, 1);
-        board.set(0,1, 1); // row dup
-        board.set(1,0, 1); // col dup
+        // Given board with multiple issues (row + column)
+        board.set(0, 0, 1);
+        board.set(0, 1, 1); // row dup
+        board.set(1, 0, 1); // col dup
+
         CheckCommand cmd = new CheckCommand();
-        
-        // When executed
         cmd.execute(board, null, null);
-        
-        // Then lists all problems
+
         String output = outContent.toString();
-        assertTrue(output.split("\n").length > 2); // multiple lines
+        assertTrue(output.contains("Problems found:"), "Expected problems header");
+        assertTrue(output.toLowerCase().contains("duplicate 1 in row"), "Expected row duplicate to be reported");
+        assertTrue(output.toLowerCase().contains("duplicate 1 in column"), "Expected column duplicate to be reported");
     }
 }

@@ -17,6 +17,39 @@ public class BoardTest {
     }
 
     @Test
+    void generateAndSetPuzzle_twice_doesNotLeakPrefilledState() {
+        Board b = new Board();
+
+        int[][] solution1 = b.generateAndSetPuzzle();
+        int prefCount1 = 0;
+        for (int r = 0; r < Board.SIZE; r++) {
+            for (int c = 0; c < Board.SIZE; c++) {
+                if (b.isPrefilled(r, c)) {
+                    prefCount1++;
+                    assertNotEquals(0, b.get(r, c), "Prefilled cells must have non-zero values after puzzle generation");
+                }
+            }
+        }
+        assertEquals(Board.PREFILLED_COUNT, prefCount1, "First puzzle should mark requested number of prefilled cells");
+
+        int[][] solution2 = b.generateAndSetPuzzle();
+        int prefCount2 = 0;
+        for (int r = 0; r < Board.SIZE; r++) {
+            for (int c = 0; c < Board.SIZE; c++) {
+                if (b.isPrefilled(r, c)) {
+                    prefCount2++;
+                    assertNotEquals(0, b.get(r, c), "Prefilled cells must have non-zero values after second puzzle generation");
+                }
+            }
+        }
+        assertEquals(Board.PREFILLED_COUNT, prefCount2, "Second puzzle should re-mark requested number of prefilled cells");
+
+        // Sanity: ensure we still have a full solution matrix returned.
+        assertEquals(9, solution1.length);
+        assertEquals(9, solution2.length);
+    }
+
+    @Test
     void prefilledMarkingAndQuery() {
         Board b = new Board();
         b.set(0,0,5);

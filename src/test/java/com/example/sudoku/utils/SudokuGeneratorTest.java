@@ -54,6 +54,11 @@ public class SudokuGeneratorTest {
                 }
             }
         }
+
+        // uniqueness check: ensure there is exactly 1 solution
+        int solutions = SudokuUtils.countSolutions(board.toArrayCopy(), 2);
+        assertEquals(1, solutions, "Generated puzzle should have exactly one solution");
     }
 }
+
 
