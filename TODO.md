@@ -1,9 +1,8 @@
-# README Update Task
+# TODO
 
-## Steps
-- [x] 1. Create this TODO.md ✅
-- [x] 2. Update README.md with Recent Changes section ✅
-- [ ] 3. Run `mvn clean test` to verify tests post-import organization
-- [x] 4. Update TODO.md with progress ✅
+- [ ] Remove all Mermaid diagram blocks from README_PROJECT.md.
+- [ ] Replace each removed diagram with equivalent plain-text/function-style explanation (full code snippets if applicable).
+- [x] Ensure README_PROJECT.md has no remaining `mermaid` fences.
+- [x] Run `mvn test` (optional) to ensure repo health after doc changes.
 
-**Recent:** Standardised build/test/run where possible (Maven + shaded jar). Fixed HintCommand to use the provided Random. Tests verified via `mvn test` (Maven clean can intermittently fail due to Windows target deletion locking).
+

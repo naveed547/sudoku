@@ -82,4 +82,50 @@ public class SudokuUtils {
                 if (board[r][c] == 0) return false;
         return validateWholeBoard(board).isEmpty();
     }
+
+    /**
+     * Counts the number of valid solutions for the given (partially filled) board.
+     * Uses backtracking and stops as soon as it reaches {@code limit}.
+     *
+     * @param board board values, where 0 means empty
+     * @param limit maximum number of solutions to search for (for early stopping)
+     */
+    public static int countSolutions(int[][] board, int limit) {
+        int[][] working = new int[Board.SIZE][Board.SIZE];
+        for (int r = 0; r < Board.SIZE; r++) {
+            System.arraycopy(board[r], 0, working[r], 0, Board.SIZE);
+        }
+        return countSolutionsBacktrack(working, limit);
+    }
+
+    private static int countSolutionsBacktrack(int[][] board, int limit) {
+        int[] next = findNextEmpty(board);
+        if (next == null) {
+            // complete grid; ensure no duplicates
+            return validateWholeBoard(board).isEmpty() ? 1 : 0;
+        }
+
+        int r = next[0], c = next[1];
+
+        int count = 0;
+        for (int val = 1; val <= Board.SIZE; val++) {
+            if (!isValidMove(board, r, c, val)) continue;
+            board[r][c] = val;
+            count += countSolutionsBacktrack(board, limit);
+            board[r][c] = 0;
+
+            if (count >= limit) return count;
+        }
+        return count;
+    }
+
+    private static int[] findNextEmpty(int[][] board) {
+        for (int r = 0; r < Board.SIZE; r++) {
+            for (int c = 0; c < Board.SIZE; c++) {
+                if (board[r][c] == 0) return new int[]{r, c};
+            }
+        }
+        return null;
+    }
 }
+

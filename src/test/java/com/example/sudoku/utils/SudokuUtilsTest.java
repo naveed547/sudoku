@@ -62,6 +62,18 @@ public class SudokuUtilsTest {
     }
 
     @Test
+    void validateWholeBoard_reportsBoxDuplicates() {
+        int[][] b = new int[Board.SIZE][Board.SIZE];
+        // top-left 3x3 box (rows 0..2, cols 0..2)
+        b[0][0] = 9;
+        b[1][1] = 9; // box duplicate
+
+        List<String> problems = SudokuUtils.validateWholeBoard(b);
+        String joined = String.join("\n", problems).toLowerCase();
+        assertTrue(joined.contains("box"), "Expected a box-duplicate problem");
+    }
+
+    @Test
     void validateWholeBoard_reportsDuplicates() {
         int[][] b = new int[Board.SIZE][Board.SIZE];
         b[0][0] = 1;
@@ -74,6 +86,47 @@ public class SudokuUtilsTest {
         String joined = String.join("\n", problems).toLowerCase();
         assertTrue(joined.contains("row"));
         assertTrue(joined.contains("column"));
+    }
+
+    @Test
+    void isCompleteAndValid_returnsTrueForSolvedBoard() {
+        SudokuGenerator gen = new SudokuGenerator(new java.util.Random(42));
+        int[][] solution = gen.generateFullSolution();
+
+        assertTrue(SudokuUtils.isCompleteAndValid(solution), "Solved solution must be complete and valid");
+    }
+
+    @Test
+    void countSolutions_returnsZeroForConflictingBoard() {
+        // Use a fully filled (solved) board and introduce a direct conflict.
+        // Since there are no zeros, countSolutions will validate immediately (no expensive backtracking).
+        SudokuGenerator gen = new SudokuGenerator(new java.util.Random(42));
+        int[][] solution = gen.generateFullSolution();
+
+        // Introduce a row duplicate by corrupting one cell.
+        solution[0][1] = solution[0][0];
+
+        int solutions = SudokuUtils.countSolutions(solution, 2);
+        assertEquals(0, solutions);
+    }
+
+    @Test
+    void countSolutions_returnsOneForValidSolvedBoard() {
+        SudokuGenerator gen = new SudokuGenerator(new java.util.Random(42));
+        int[][] solution = gen.generateFullSolution();
+
+        int solutions = SudokuUtils.countSolutions(solution, 2);
+        assertEquals(1, solutions);
+    }
+
+    @Test
+    void countSolutions_respectsLimit() {
+        SudokuGenerator gen = new SudokuGenerator(new java.util.Random(42));
+        int[][] solution = gen.generateFullSolution();
+
+        // Use limit=1; should still find at least 1 solution and stop early.
+        int solutions = SudokuUtils.countSolutions(solution, 1);
+        assertEquals(1, solutions);
     }
 
     @Test
