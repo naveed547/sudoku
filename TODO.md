@@ -1,11 +1,13 @@
-# TODO
+## TODO - SRP refactor + tests
 
-- [ ] Introduce `CommandResult` DTO (success + message)
-- [ ] Refactor `Command.execute(...)` to return `CommandResult`
-- [x] Refactor all command implementations to remove `System.out.println` and return messages via `CommandResult`
-
-- [ ] Update `SudokuGame` to print command messages based on `CommandResult` and use `success` to control loop
-- [x] Update unit tests to assert on `CommandResult.message` / `success` instead of captured stdout
-
-- [ ] Run `run-tests.ps1` / `mvn test` and fix any failing assertions/compilation issues
-
+- [ ] Create `BoardRenderer` and move all display formatting out of `Board`
+- [ ] Create `GameService` (or `SudokuGameService`) and move puzzle generation flow out of `Board`
+- [ ] Refactor `Board` to be state-only (remove `generateAndSetPuzzle()` and `display()` and any puzzle-flow state)
+- [ ] Update `SudokuGame` to use `GameService` + `BoardRenderer`
+- [ ] Update/adjust `BoardTest`:
+  - [ ] Keep state tests (`set/get/clear`, `prefilled` marking, empties)
+  - [ ] Move generation tests to a new service test (e.g., `GameServiceTest`)
+- [ ] Add new tests:
+  - [ ] Service test verifying puzzle generation produces a valid complete solution and correct prefilled count
+  - [ ] Renderer smoke test verifying rendering output contains expected row/labels and cell values
+- [ ] Run `mvn test` and ensure all tests pass

@@ -2,8 +2,6 @@ package com.example.sudoku;
 
 import java.util.*;
 
-import com.example.sudoku.utils.SudokuGenerator;
-
 /**
  * Board model
  * Provides small helpers for reading/modifying cells and querying empties.
@@ -15,8 +13,7 @@ public class Board {
     private final int[][] board = new int[SIZE][SIZE];
     private final boolean[][] prefilled = new boolean[SIZE][SIZE];
 
-    private boolean PUZZLE_STARTED = false;
-
+    private boolean puzzleStarted = false;
 
     // Copy solution values into the board (used when creating a puzzle)
     public void copyFromSolution(int[][] solution) {
@@ -24,14 +21,24 @@ public class Board {
     }
 
     /**
-     * Returns the full generated solution so callers can use it for validation/hints.
+     * Reset board state before generating a new puzzle.
+     * (Generation flow lives in GameService now.)
      */
-    public int[][] generateAndSetPuzzle() {
-        this.resetBoard();
-        SudokuGenerator gen = new SudokuGenerator(new Random());
-        int[][] solution = gen.generateFullSolution();
-        gen.createPuzzle(this, solution, PREFILLED_COUNT);
-        return solution;
+    public void resetState() {
+        // reset board and prefilled markers
+        for (int r = 0; r < SIZE; r++) {
+            Arrays.fill(board[r], 0);
+            Arrays.fill(prefilled[r], false);
+        }
+        puzzleStarted = false;
+    }
+
+    public boolean isPuzzleStarted() {
+        return puzzleStarted;
+    }
+
+    public void setPuzzleStarted(boolean v) {
+        this.puzzleStarted = v;
     }
 
     public int get(int r, int c) { return board[r][c]; }
@@ -60,41 +67,17 @@ public class Board {
                 prefilled[r][c] = board[r][c] != 0;
     }
 
-    public void display() {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append(PUZZLE_STARTED ? "Current grid:" : "Here is your puzzle:").append('\n');
-        String colsHeader = "   1 2 3 | 4 5 6 | 7 8 9 ";
-        sb.append(colsHeader).append('\n');
-        sb.append("   ------+-------+------- ").append('\n');
-
-        for (int r = 0; r < 9; r++) {
-            char rowLabel = (char) ('A' + r);
-            sb.append(rowLabel).append("  ");
-
-            for (int c = 0; c < 9; c++) {
-                int val = get(r, c);
-                String cell = (val == 0) ? "_" : String.valueOf(val);
-                sb.append(cell).append(" ");
-                if (c % 3 == 2 && c < 8) sb.append("| ");
-            }
-
-            sb.append('\n');
-            if (r % 3 == 2 && r < 8) {
-                sb.append("   ------+-------+------- ").append('\n');
-            }
-        }
-
-        System.out.print(sb.toString()+ "\n");
-        PUZZLE_STARTED = true;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Board board1 = (Board) o;
+        return Arrays.deepEquals(board, board1.board) && Arrays.deepEquals(prefilled, board1.prefilled);
     }
 
-    private void resetBoard() {
-        // reset board and prefilled markers
-        for (int r = 0; r < SIZE; r++) {
-            Arrays.fill(board[r], 0);
-            Arrays.fill(prefilled[r], false);
-        }
+    @Override
+    public int hashCode() {
+        return 31 * Arrays.deepHashCode(board) + Arrays.deepHashCode(prefilled);
     }
 }
 
