@@ -7,16 +7,16 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SudokuUtilsTest {
+public class SudokuValidatorTest {
 
     @Test
     void parseCell_acceptsUpperAndLowercase() {
-        int[] a3 = SudokuUtils.parseCell("A3");
+        int[] a3 = SudokuValidator.parseCell("A3");
         assertNotNull(a3);
         assertEquals(0, a3[0]);
         assertEquals(2, a3[1]);
 
-        int[] b9 = SudokuUtils.parseCell("b9");
+        int[] b9 = SudokuValidator.parseCell("b9");
         assertNotNull(b9);
         assertEquals(1, b9[0]);
         assertEquals(8, b9[1]);
@@ -24,41 +24,41 @@ public class SudokuUtilsTest {
 
     @Test
     void parseCell_rejectsInvalid() {
-        assertNull(SudokuUtils.parseCell(null));
-        assertNull(SudokuUtils.parseCell(""));
-        assertNull(SudokuUtils.parseCell("Z1"));
-        assertNull(SudokuUtils.parseCell("A0"));
-        assertNull(SudokuUtils.parseCell("A10"));
-        assertNull(SudokuUtils.parseCell("AA"));
-        assertNull(SudokuUtils.parseCell("A3x"));
+        assertNull(SudokuValidator.parseCell(null));
+        assertNull(SudokuValidator.parseCell(""));
+        assertNull(SudokuValidator.parseCell("Z1"));
+        assertNull(SudokuValidator.parseCell("A0"));
+        assertNull(SudokuValidator.parseCell("A10"));
+        assertNull(SudokuValidator.parseCell("AA"));
+        assertNull(SudokuValidator.parseCell("A3x"));
     }
 
     @Test
     void isValidMove_rejectsRowDuplicates() {
         int[][] b = new int[Board.SIZE][Board.SIZE];
         b[0][0] = 5;
-        assertFalse(SudokuUtils.isValidMove(b, 0, 1, 5));
+        assertFalse(SudokuValidator.isValidMove(b, 0, 1, 5));
     }
 
     @Test
     void isValidMove_rejectsColumnDuplicates() {
         int[][] b = new int[Board.SIZE][Board.SIZE];
         b[0][0] = 7;
-        assertFalse(SudokuUtils.isValidMove(b, 1, 0, 7));
+        assertFalse(SudokuValidator.isValidMove(b, 1, 0, 7));
     }
 
     @Test
     void isValidMove_rejectsBoxDuplicates() {
         int[][] b = new int[Board.SIZE][Board.SIZE];
         b[1][1] = 9; // top-left 3x3 box
-        assertFalse(SudokuUtils.isValidMove(b, 0, 2, 9));
+        assertFalse(SudokuValidator.isValidMove(b, 0, 2, 9));
     }
 
     @Test
     void isValidMove_allowsNonConflictingPlacement() {
         int[][] b = new int[Board.SIZE][Board.SIZE];
         b[0][0] = 5;
-        assertTrue(SudokuUtils.isValidMove(b, 0, 1, 3));
+        assertTrue(SudokuValidator.isValidMove(b, 0, 1, 3));
     }
 
     @Test
@@ -68,7 +68,7 @@ public class SudokuUtilsTest {
         b[0][0] = 9;
         b[1][1] = 9; // box duplicate
 
-        List<String> problems = SudokuUtils.validateWholeBoard(b);
+        List<String> problems = SudokuValidator.validateWholeBoard(b);
         String joined = String.join("\n", problems).toLowerCase();
         assertTrue(joined.contains("box"), "Expected a box-duplicate problem");
     }
@@ -81,7 +81,7 @@ public class SudokuUtilsTest {
         b[1][0] = 2;
         b[2][0] = 2; // column duplicate
 
-        List<String> problems = SudokuUtils.validateWholeBoard(b);
+        List<String> problems = SudokuValidator.validateWholeBoard(b);
         assertTrue(problems.size() >= 2);
         String joined = String.join("\n", problems).toLowerCase();
         assertTrue(joined.contains("row"));
@@ -93,7 +93,7 @@ public class SudokuUtilsTest {
         SudokuGenerator gen = new SudokuGenerator(new java.util.Random(42));
         int[][] solution = gen.generateFullSolution();
 
-        assertTrue(SudokuUtils.isCompleteAndValid(solution), "Solved solution must be complete and valid");
+        assertTrue(SudokuValidator.isCompleteAndValid(solution), "Solved solution must be complete and valid");
     }
 
     @Test
@@ -106,7 +106,7 @@ public class SudokuUtilsTest {
         // Introduce a row duplicate by corrupting one cell.
         solution[0][1] = solution[0][0];
 
-        int solutions = SudokuUtils.countSolutions(solution, 2);
+        int solutions = SudokuValidator.countSolutions(solution, 2);
         assertEquals(0, solutions);
     }
 
@@ -115,7 +115,7 @@ public class SudokuUtilsTest {
         SudokuGenerator gen = new SudokuGenerator(new java.util.Random(42));
         int[][] solution = gen.generateFullSolution();
 
-        int solutions = SudokuUtils.countSolutions(solution, 2);
+        int solutions = SudokuValidator.countSolutions(solution, 2);
         assertEquals(1, solutions);
     }
 
@@ -125,7 +125,7 @@ public class SudokuUtilsTest {
         int[][] solution = gen.generateFullSolution();
 
         // Use limit=1; should still find at least 1 solution and stop early.
-        int solutions = SudokuUtils.countSolutions(solution, 1);
+        int solutions = SudokuValidator.countSolutions(solution, 1);
         assertEquals(1, solutions);
     }
 
@@ -133,7 +133,7 @@ public class SudokuUtilsTest {
     void isCompleteAndValid_returnsFalseIfAnyZero() {
         int[][] b = new int[Board.SIZE][Board.SIZE];
         b[0][0] = 1;
-        assertFalse(SudokuUtils.isCompleteAndValid(b));
+        assertFalse(SudokuValidator.isCompleteAndValid(b));
     }
 }
 

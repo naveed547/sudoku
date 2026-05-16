@@ -3,20 +3,20 @@ package com.example.sudoku.commands;
 import java.util.Scanner;
 
 import com.example.sudoku.Board;
-import com.example.sudoku.utils.SudokuUtils;
+import com.example.sudoku.utils.SudokuValidator;
 
-public class PlaceCommand implements Command {
+public class SetCellCommand implements Command {
     private final String cell;
     private final String valueToken;
 
-    public PlaceCommand(String cell, String valueToken) {
+    public SetCellCommand(String cell, String valueToken) {
         this.cell = cell;
         this.valueToken = valueToken;
     }
 
     @Override
     public CommandResult execute(Board board, int[][] solution, Scanner sc) {
-        int[] rc = SudokuUtils.parseCell(cell);
+        int[] rc = SudokuValidator.parseCell(cell);
         if (rc == null) {
             return CommandResult.continueGame("\nInvalid cell reference.\n");
         }

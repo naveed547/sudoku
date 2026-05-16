@@ -8,7 +8,7 @@ import com.example.sudoku.Board;
  * Utility functions for Sudoku logic: validation, move checks, parsing.
  * Kept stateless and static so tests can call them directly.
  */
-public class SudokuUtils {
+public class SudokuValidator {
     // Parse cell string like "A3" or "a3" -> {row,col} or return null if invalid
     public static int[] parseCell(String s) {
         if (s == null) return null;

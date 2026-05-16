@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.example.sudoku.Board;
 import com.example.sudoku.utils.SudokuGenerator;
 
-public class CheckCommandTest {
+public class ValidateBoardCommandTest {
     private Board board;
     private Random rand;
     private int[][] solution;
@@ -32,7 +32,7 @@ public class CheckCommandTest {
             }
         }
 
-        CheckCommand cmd = new CheckCommand();
+        ValidateBoardCommand cmd = new ValidateBoardCommand();
         CommandResult result = cmd.execute(board, null, null);
 
         assertTrue(result.success);
@@ -46,7 +46,7 @@ public class CheckCommandTest {
         board.set(0, 0, 1);
         board.set(0, 1, 1);
 
-        CheckCommand cmd = new CheckCommand();
+        ValidateBoardCommand cmd = new ValidateBoardCommand();
         CommandResult result = cmd.execute(board, null, null);
 
         assertTrue(result.success);
@@ -60,7 +60,7 @@ public class CheckCommandTest {
         board.set(0, 0, 1);
         board.set(1, 0, 1);
 
-        CheckCommand cmd = new CheckCommand();
+        ValidateBoardCommand cmd = new ValidateBoardCommand();
         CommandResult result = cmd.execute(board, null, null);
 
         assertTrue(result.success);
@@ -74,7 +74,7 @@ public class CheckCommandTest {
         board.set(0, 0, 1);
         board.set(1, 1, 1);
 
-        CheckCommand cmd = new CheckCommand();
+        ValidateBoardCommand cmd = new ValidateBoardCommand();
         CommandResult result = cmd.execute(board, null, null);
 
         assertTrue(result.success);
@@ -89,7 +89,7 @@ public class CheckCommandTest {
         board.set(0, 1, 1);
         board.set(1, 0, 1);
 
-        CheckCommand cmd = new CheckCommand();
+        ValidateBoardCommand cmd = new ValidateBoardCommand();
         CommandResult result = cmd.execute(board, null, null);
 
         assertTrue(result.success);

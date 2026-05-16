@@ -14,13 +14,11 @@ public class CommandFactory {
     private static final Map<String, Supplier<Command>> COMMANDS = Map.of(
             "quit", QuitCommand::new,
             "hint", HintCommand::new,
-            "check", CheckCommand::new,
-            "help", HelpCommand::new
-    );
+            "check", ValidateBoardCommand::new,
+            "help", HelpCommand::new);
 
     private static final Map<String, Function<String, Command>> ARG_COMMANDS = Map.of(
-            "clear", ClearCommand::new
-    );
+            "clear", ClearCommand::new);
 
     public static Command parse(String line, Board board, int[][] solution, java.util.Scanner sc) {
         if (line == null || line.trim().isEmpty()) {
@@ -49,10 +47,9 @@ public class CommandFactory {
 
         // Default: place command expects: <cell> <number>
         if (parts.length >= 2 && parts[1] != null && parts[1].matches("\\d+")) {
-            return new PlaceCommand(parts[0], parts[1]);
+            return new SetCellCommand(parts[0], parts[1]);
         }
 
         return new UnknownCommand();
     }
 }
-
