@@ -2,27 +2,24 @@ package com.example.sudoku.commands;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.util.*;
+
+import java.util.List;
+import java.util.Random;
+
 import static org.junit.jupiter.api.Assertions.*;
-import com.example.sudoku.commands.HintCommand;
+
 import com.example.sudoku.Board;
 import com.example.sudoku.utils.SudokuGenerator;
-
 
 public class HintCommandTest {
     private Board board;
     private int[][] solution;
     private Random rand;
-    private ByteArrayOutputStream outContent;
 
     @BeforeEach
     void setUp() {
         rand = new Random(42);
-        outContent = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(outContent));
-        
+
         board = new Board();
         SudokuGenerator gen = new SudokuGenerator(rand);
         solution = gen.generateFullSolution();
@@ -30,51 +27,48 @@ public class HintCommandTest {
     }
 
     @Test
-    void hintCommand_whenEmptyCellsExist_thenFillsOneWithSolutionValueAndShowsHint() {
-        // Given board with empty non-prefilled cells
+    void hintCommand_whenEmptyCellsExist_thenFillsOneWithSolutionValueAndReturnsHint() {
         int beforeEmpties = board.getEmptyNonPrefilledCells().size();
-        
-        // When hint executed
+
         HintCommand cmd = new HintCommand();
-        cmd.execute(board, solution, null);
-        
-        // Then one less empty, shows hint location/value
+        CommandResult result = cmd.execute(board, solution, null);
+
+        assertTrue(result.success);
+        assertNotNull(result.message);
+        assertTrue(result.message.contains("Hint: cell"));
+
         int afterEmpties = board.getEmptyNonPrefilledCells().size();
         assertEquals(beforeEmpties - 1, afterEmpties);
-        String output = outContent.toString();
-        assertTrue(output.contains("Hint: cell"));
-        assertTrue(output.contains("Hint: cell"));
     }
 
     @Test
     void hintCommand_whenNoEmptyNonPrefilled_thenShowsNoHintsAvailable() {
-        // Given board with no empty non-prefilled cells (all filled or prefilled)
-        for (int[] cell : board.getEmptyNonPrefilledCells()) {
+        List<int[]> empties = board.getEmptyNonPrefilledCells();
+        for (int[] cell : empties) {
             board.set(cell[0], cell[1], solution[cell[0]][cell[1]]);
         }
-        
-        // When hint executed
+
         HintCommand cmd = new HintCommand();
-        cmd.execute(board, solution, null);
-        
-        // Then shows no hints message
-        String output = outContent.toString();
-        assertTrue(output.contains("No available hints"));
+        CommandResult result = cmd.execute(board, solution, null);
+
+        assertTrue(result.success);
+        assertNotNull(result.message);
+        assertTrue(result.message.contains("No available hints"));
     }
 
     @Test
     void hintCommand_usesSolutionValueNotArbitrary() {
-        // Given puzzle generated from known solution
-        List<int[]> empties = board.getEmptyNonPrefilledCells();
-        assertFalse(empties.isEmpty()); // ensure we have empties
-        
-        // When executed
+        List<int[]> beforeEmpties = board.getEmptyNonPrefilledCells();
+        assertFalse(beforeEmpties.isEmpty());
+
         HintCommand cmd = new HintCommand();
-        cmd.execute(board, solution, null);
-        
-        // Then some empty cell was filled with solution value
+        CommandResult result = cmd.execute(board, solution, null);
+
+        assertTrue(result.success);
+        assertNotNull(result.message);
+
         boolean found = false;
-        for (int[] cell : empties) {
+        for (int[] cell : beforeEmpties) {
             int r = cell[0], c = cell[1];
             if (board.get(r, c) == solution[r][c]) {
                 found = true;
@@ -84,3 +78,4 @@ public class HintCommandTest {
         assertTrue(found, "No solution value placed from empties");
     }
 }
+

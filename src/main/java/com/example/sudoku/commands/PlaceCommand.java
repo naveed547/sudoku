@@ -5,7 +5,6 @@ import java.util.Scanner;
 import com.example.sudoku.Board;
 import com.example.sudoku.utils.SudokuUtils;
 
-
 public class PlaceCommand implements Command {
     private final String cell;
     private final String valueToken;
@@ -16,36 +15,31 @@ public class PlaceCommand implements Command {
     }
 
     @Override
-    public boolean execute(Board board, int[][] solution, Scanner sc) {
+    public CommandResult execute(Board board, int[][] solution, Scanner sc) {
         int[] rc = SudokuUtils.parseCell(cell);
         if (rc == null) {
-            System.out.println("\nInvalid cell reference.\n");
-            return true;
+            return CommandResult.continueGame("\nInvalid cell reference.\n");
         }
         int r = rc[0], c = rc[1];
         if (board.isPrefilled(r, c)) {
-            System.out.println("\nCannot modify a prefilled cell.\n");
-            return true;
+            return CommandResult.continueGame("\nCannot modify a prefilled cell.\n");
         }
 
         int val;
         try {
             val = Integer.parseInt(valueToken);
         } catch (NumberFormatException e) {
-            System.out.println("\nSecond token must be a number 1-9.\n");
-            return true;
+            return CommandResult.continueGame("\nSecond token must be a number 1-9.\n");
         }
 
         if (val < 1 || val > 9) {
-            System.out.println("\nNumber must be between 1 and 9.\n");
-            return true;
+            return CommandResult.continueGame("\nNumber must be between 1 and 9.\n");
         }
 
         // Accept the move even if it creates a rule violation.
         // The player will learn/see violations when they run `check`.
         board.set(r, c, val);
-        System.out.println("\nPlaced " + val + " at " + cell.toUpperCase() + "\n");
-        return true;
+        return CommandResult.continueGame("\nPlaced " + val + " at " + cell.toUpperCase() + "\n");
     }
 }
 

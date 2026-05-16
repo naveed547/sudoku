@@ -6,10 +6,9 @@ import java.util.Scanner;
 import com.example.sudoku.Board;
 import com.example.sudoku.utils.SudokuUtils;
 
-
 public class CheckCommand implements Command {
     @Override
-    public boolean execute(Board board, int[][] solution, Scanner sc) {
+    public CommandResult execute(Board board, int[][] solution, Scanner sc) {
         // Validate the grid and report violations, but NEVER reject/correct the last move here.
         // Player inputs are allowed; `check` is where the player learns what is wrong.
         List<String> problems = SudokuUtils.validateWholeBoard(board.toArrayCopy());
@@ -24,8 +23,7 @@ public class CheckCommand implements Command {
             }
         }
 
-        System.out.println("\n" + sb + "\n");
-        return true;
+        return CommandResult.continueGame("\n" + sb + "\n");
     }
 }
 

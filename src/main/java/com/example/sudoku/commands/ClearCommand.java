@@ -4,7 +4,6 @@ import java.util.Scanner;
 import com.example.sudoku.Board;
 import com.example.sudoku.utils.SudokuUtils;
 
-
 public class ClearCommand implements Command {
     private final String cell;
 
@@ -13,24 +12,20 @@ public class ClearCommand implements Command {
     }
 
     @Override
-    public boolean execute(Board board, int[][] solution, Scanner sc) {
+    public CommandResult execute(Board board, int[][] solution, Scanner sc) {
         int[] rc = SudokuUtils.parseCell(cell);
         if (rc == null) {
-            System.out.println("\nInvalid cell reference.\n");
-            return true;
+            return CommandResult.continueGame("\nInvalid cell reference.\n");
         }
         int r = rc[0], c = rc[1];
         if (board.isPrefilled(r, c)) {
-            System.out.println("\nCannot clear a prefilled cell.\n");
-            return true;
+            return CommandResult.continueGame("\nCannot clear a prefilled cell.\n");
         }
         if (board.get(r, c) == 0) {
-            System.out.println("\nCell already empty.\n");
-            return true;
+            return CommandResult.continueGame("\nCell already empty.\n");
         }
         board.clear(r, c);
-        System.out.println("\nCleared " + cell.toUpperCase() + "\n");
-        return true;
+        return CommandResult.continueGame("\nCleared " + cell.toUpperCase() + "\n");
     }
 }
 

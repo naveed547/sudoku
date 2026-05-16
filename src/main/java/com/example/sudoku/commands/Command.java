@@ -8,5 +8,6 @@ import com.example.sudoku.Board;
  * Interface for all Sudoku commands.
  */
 public interface Command {
-    boolean execute(Board board, int[][] solution, Scanner sc);
+    CommandResult execute(Board board, int[][] solution, Scanner sc);
 }
+
