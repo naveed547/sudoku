@@ -23,7 +23,7 @@ public class SudokuGeneratorTest {
             }
         }
 
-        assertTrue(SudokuUtils.isCompleteAndValid(solution), "Generated solution must be complete and valid");
+        assertTrue(SudokuValidator.isCompleteAndValid(solution), "Generated solution must be complete and valid");
     }
 
     @Test
@@ -56,7 +56,7 @@ public class SudokuGeneratorTest {
         }
 
         // uniqueness check: ensure there is exactly 1 solution
-        int solutions = SudokuUtils.countSolutions(board.toArrayCopy(), 2);
+        int solutions = SudokuValidator.countSolutions(board.toArrayCopy(), 2);
         assertEquals(1, solutions, "Generated puzzle should have exactly one solution");
     }
 }

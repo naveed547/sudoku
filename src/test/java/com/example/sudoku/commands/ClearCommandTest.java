@@ -2,84 +2,76 @@ package com.example.sudoku.commands;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+
 import java.util.Random;
+
 import static org.junit.jupiter.api.Assertions.*;
-import com.example.sudoku.commands.ClearCommand;
+
 import com.example.sudoku.Board;
 import com.example.sudoku.utils.SudokuGenerator;
-
 
 public class ClearCommandTest {
     private Board board;
     private Random rand;
-    private ByteArrayOutputStream outContent;
+    private int[][] solution;
 
     @BeforeEach
     void setUp() {
         rand = new Random(42);
-        outContent = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(outContent));
-        
+
         board = new Board();
         SudokuGenerator gen = new SudokuGenerator(rand);
-        int[][] solution = gen.generateFullSolution();
+        solution = gen.generateFullSolution();
         gen.createPuzzle(board, solution, 30);
     }
 
     @Test
-    void clearCommand_whenNonPrefilledFilledCell_thenClearsAndShowsMessage() {
-        // Given filled non-prefilled cell A1 with value 7
-        board.set(0,0, 7);
-        board.setPrefilled(0,0, false);
+    void clearCommand_whenNonPrefilledFilledCell_thenClearsAndReturnsMessage() {
+        board.set(0, 0, 7);
+        board.setPrefilled(0, 0, false);
+
         ClearCommand cmd = new ClearCommand("A1");
-        
-        // When executed
-        cmd.execute(board, null, null);
-        
-        // Then cell cleared, confirmation message
-        assertEquals(0, board.get(0,0));
-        assertTrue(outContent.toString().contains("Cleared A1"));
+        CommandResult result = cmd.execute(board, null, null);
+
+        assertTrue(result.success);
+        assertNotNull(result.message);
+        assertTrue(result.message.contains("Cleared A1"));
+        assertEquals(0, board.get(0, 0));
     }
 
     @Test
     void clearCommand_whenPrefilledCell_thenRejectsAndKeepsValue() {
-        // Given prefilled cell A1 with value 7
-        board.setPrefilled(0,0, true);
-        board.set(0,0, 7);
+        board.setPrefilled(0, 0, true);
+        board.set(0, 0, 7);
+
         ClearCommand cmd = new ClearCommand("A1");
-        
-        // When executed
-        cmd.execute(board, null, null);
-        
-        // Then value preserved, rejection message
-        assertEquals(7, board.get(0,0));
-        assertTrue(outContent.toString().contains("Cannot clear"));
+        CommandResult result = cmd.execute(board, null, null);
+
+        assertTrue(result.success);
+        assertNotNull(result.message);
+        assertTrue(result.message.contains("Cannot clear"));
+        assertEquals(7, board.get(0, 0));
     }
 
     @Test
     void clearCommand_whenAlreadyEmptyCell_thenShowsAlreadyEmpty() {
-        // Given empty cell A1
         ClearCommand cmd = new ClearCommand("A1");
-        
-        // When executed
-        cmd.execute(board, null, null);
-        
-        // Then no change, already empty message
-        assertEquals(0, board.get(0,0));
-        assertTrue(outContent.toString().contains("already empty"));
+        CommandResult result = cmd.execute(board, null, null);
+
+        assertTrue(result.success);
+        assertNotNull(result.message);
+        assertTrue(result.message.toLowerCase().contains("already empty"));
+        assertEquals(0, board.get(0, 0));
     }
 
     @Test
     void clearCommand_whenInvalidCell_thenShowsError() {
-        // Given invalid cell Z9
         ClearCommand cmd = new ClearCommand("Z9");
-        
-        // When executed
-        cmd.execute(board, null, null);
-        
-        // Then error message
-        assertTrue(outContent.toString().contains("Invalid cell"));
+        CommandResult result = cmd.execute(board, null, null);
+
+        assertTrue(result.success);
+        assertNotNull(result.message);
+        assertTrue(result.message.contains("Invalid cell"));
     }
 }
+

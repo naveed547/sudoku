@@ -2,9 +2,9 @@ package com.example.sudoku;
 
 import java.util.Scanner;
 import com.example.sudoku.commands.*;
-import com.example.sudoku.utils.SudokuGenerator;
-import com.example.sudoku.utils.SudokuUtils;
+import com.example.sudoku.commands.CommandResult;
 
+import com.example.sudoku.utils.SudokuValidator;
 
 /**
  * Main entry point for the Sudoku CLI game.
@@ -27,7 +27,7 @@ public class SudokuGame {
             board.display();
 
             System.out.println("Enter command (eg: A3 4, clear C5, hint, check, quit): ");
-            if (SudokuUtils.isCompleteAndValid(board.toArrayCopy())) {
+            if (SudokuValidator.isCompleteAndValid(board.toArrayCopy())) {
                 System.out.println("You have successfully completed the Sudoku puzzle!");
                 System.out.println("Press ENTER to play again...");
                 sc.nextLine();
@@ -38,14 +38,19 @@ public class SudokuGame {
             }
 
             String line = sc.nextLine().trim();
-            if (line.isEmpty()) continue;
+            if (line.isEmpty())
+                continue;
             line = line.replace(",", " ").trim();
             Command cmd = CommandFactory.parse(line, board, solution, sc);
-            if (!cmd.execute(board, solution, sc)) {
+            CommandResult result = cmd.execute(board, solution, sc);
+            if (result != null && result.message != null) {
+                System.out.print(result.message);
+            }
+            if (result != null && !result.success) {
                 break;
             }
+
         }
         sc.close();
     }
 }
-

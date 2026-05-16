@@ -1,8 +1,11 @@
 # TODO
 
-- [ ] Remove all Mermaid diagram blocks from README_PROJECT.md.
-- [ ] Replace each removed diagram with equivalent plain-text/function-style explanation (full code snippets if applicable).
-- [x] Ensure README_PROJECT.md has no remaining `mermaid` fences.
-- [x] Run `mvn test` (optional) to ensure repo health after doc changes.
+- [ ] Introduce `CommandResult` DTO (success + message)
+- [ ] Refactor `Command.execute(...)` to return `CommandResult`
+- [x] Refactor all command implementations to remove `System.out.println` and return messages via `CommandResult`
 
+- [ ] Update `SudokuGame` to print command messages based on `CommandResult` and use `success` to control loop
+- [x] Update unit tests to assert on `CommandResult.message` / `success` instead of captured stdout
+
+- [ ] Run `run-tests.ps1` / `mvn test` and fix any failing assertions/compilation issues
 
