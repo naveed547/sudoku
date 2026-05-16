@@ -1,5 +1,6 @@
 package com.example.sudoku;
 
+import com.example.sudoku.utils.SudokuGenerator;
 import com.example.sudoku.utils.SudokuValidator;
 import org.junit.jupiter.api.Test;
 
@@ -25,9 +26,11 @@ class SudokuGameTest {
     @Test
     void generatedSolutionIsCompleteAndValid() {
         // Smoke test for the core bootstrap path used by SudokuGame:
-        // SudokuGame -> Board.generateAndSetPuzzle() -> SudokuGenerator.generateFullSolution()
+        // SudokuGame -> GameService.newPuzzle() -> SudokuGenerator.generateFullSolution()
         Board board = new Board();
-        int[][] solution = board.generateAndSetPuzzle();
+        GameService service = new GameService(new SudokuGenerator(new java.util.Random(1)));
+
+        int[][] solution = service.newPuzzle(board);
 
         assertNotNull(solution);
         assertEquals(Board.SIZE, solution.length);
@@ -40,7 +43,8 @@ class SudokuGameTest {
     @Test
     void validatorRejectsIncompleteSolution() {
         Board board = new Board();
-        board.generateAndSetPuzzle();
+        GameService service = new GameService(new SudokuGenerator(new java.util.Random(1)));
+        service.newPuzzle(board);
 
         // Puzzle grid is intentionally incomplete (has zeros).
         assertFalse(SudokuValidator.isCompleteAndValid(board.toArrayCopy()));
