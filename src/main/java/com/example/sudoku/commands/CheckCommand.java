@@ -6,7 +6,7 @@ import java.util.Scanner;
 import com.example.sudoku.Board;
 import com.example.sudoku.utils.SudokuValidator;
 
-public class ValidateBoardCommand implements Command {
+public class CheckCommand implements Command {
     @Override
     public CommandResult execute(Board board, int[][] solution, Scanner sc) {
         // Validate the grid and report violations, but NEVER reject/correct the last move here.
@@ -26,4 +26,3 @@ public class ValidateBoardCommand implements Command {
         return CommandResult.continueGame("\n" + sb + "\n");
     }
 }
-

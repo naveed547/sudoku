@@ -19,11 +19,11 @@ public class SudokuGame {
     }
 
     private void start() {
-        System.out.println("Welcome to Sudoku! (Prefilled cells are fixed and cannot be changed)\n");
-
+        
         Board board = new Board();
         BoardRenderer renderer = new BoardRenderer();
         GameService gameService = new GameService(new SudokuGenerator(new java.util.Random()));
+        renderer.printWelcome();
 
         int[][] solution = gameService.newPuzzle(board);
 
@@ -32,8 +32,7 @@ public class SudokuGame {
                 renderer.render(board, board.isPuzzleStarted());
 
                 if (SudokuValidator.isCompleteAndValid(board.toArrayCopy())) {
-                    System.out.println("You have successfully completed the Sudoku puzzle!");
-                    System.out.println("Press ENTER to play again...");
+                    renderer.printCompletionSuccess();
                     sc.nextLine();
 
                     board = new Board();
