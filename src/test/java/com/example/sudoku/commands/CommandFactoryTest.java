@@ -29,22 +29,30 @@ class CommandFactoryTest {
 
     @Test
     void parse_clearCommand_edgeCases() {
-        assertParsesTo("clear A1", ClearCommand.class);
-        assertParsesTo("clear   a1", ClearCommand.class); // spacing + case
-        assertParsesTo("clear", UnknownCommand.class); // missing arg
+        assertParsesTo("A1 clear", ClearCommand.class);
+        assertParsesTo("a1  clear", ClearCommand.class);
+        assertParsesTo("A1 Clear", ClearCommand.class);
+        assertParsesTo("a1  Clear", ClearCommand.class);
+        assertParsesTo("A1 CLEAR", ClearCommand.class);
+        assertParsesTo("a1  CLEAR", ClearCommand.class);
+
+        assertParsesTo("clear", UnknownCommand.class);
+        assertParsesTo("clear A1", UnknownCommand.class);
+        assertParsesTo("clear   a1", UnknownCommand.class);
+        assertParsesTo("clear", UnknownCommand.class);
     }
 
     @Test
     void parse_placeCommand_edgeCases() {
-        assertParsesTo("A1 5", SetCellCommand.class);
-        assertParsesTo("a1 5", SetCellCommand.class);
+        assertParsesTo("A1 5", PlaceCommand.class);
+        assertParsesTo("a1 5", PlaceCommand.class);
         assertParsesTo("A1 x", UnknownCommand.class); // invalid number
 
         // CommandFactory only checks that the 2nd token is numeric.
-        // It delegates cell-reference validation to SetCellCommand.
-        assertParsesTo("A0 5", SetCellCommand.class);  // invalid row but still numeric => SetCellCommand
-        assertParsesTo("J1 5", SetCellCommand.class);  // invalid row but still numeric => SetCellCommand
-        assertParsesTo("AA 5", SetCellCommand.class);  // invalid cell format but still numeric => SetCellCommand
+        // It delegates cell-reference validation to PlaceCommand.
+        assertParsesTo("A0 5", PlaceCommand.class);  // invalid row but still numeric => PlaceCommand
+        assertParsesTo("J1 5", PlaceCommand.class);  // invalid row but still numeric => PlaceCommand
+        assertParsesTo("AA 5", PlaceCommand.class);  // invalid cell format but still numeric => PlaceCommand
     }
 
     @Test
@@ -59,6 +67,19 @@ class CommandFactoryTest {
     void parse_unknownCommand() {
         assertParsesTo("foobar", UnknownCommand.class);
         assertParsesTo("unknown_command", UnknownCommand.class);
+        assertParsesTo("hint blah", UnknownCommand.class);
+        assertParsesTo("Hint blah", UnknownCommand.class);
+        assertParsesTo("check blah", UnknownCommand.class);
+        assertParsesTo("Check blah", UnknownCommand.class);
+        assertParsesTo("quit blah", UnknownCommand.class);
+        assertParsesTo("QUIT blah", UnknownCommand.class);
+        assertParsesTo("help blah", UnknownCommand.class);
+        assertParsesTo("Help blah", UnknownCommand.class);
+        assertParsesTo("quit blah", UnknownCommand.class);
+        assertParsesTo("Quit blah", UnknownCommand.class);
+
+        assertParsesTo("clear A3 B9", UnknownCommand.class);
+        assertParsesTo("A3 4 extra", UnknownCommand.class);
     }
 
     @Test

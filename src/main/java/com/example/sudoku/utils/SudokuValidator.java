@@ -99,7 +99,7 @@ public class SudokuValidator {
     }
 
     private static int countSolutionsBacktrack(int[][] board, int limit) {
-        int[] next = findNextEmpty(board);
+        int[] next = findBestCell(board);
         if (next == null) {
             // complete grid; ensure no duplicates
             return validateWholeBoard(board).isEmpty() ? 1 : 0;
@@ -119,13 +119,41 @@ public class SudokuValidator {
         return count;
     }
 
-    private static int[] findNextEmpty(int[][] board) {
+    private static int[] findBestCell(int[][] board) {
+
+        int minCandidates = Integer.MAX_VALUE;
+        int[] bestCell = null;
+    
         for (int r = 0; r < Board.SIZE; r++) {
             for (int c = 0; c < Board.SIZE; c++) {
-                if (board[r][c] == 0) return new int[]{r, c};
+    
+                if (board[r][c] != 0) {
+                    continue;
+                }
+    
+                int candidates = countCandidates(board, r, c);
+    
+                if (candidates < minCandidates) {
+                    minCandidates = candidates;
+                    bestCell = new int[]{r, c};
+                }
             }
         }
-        return null;
+    
+        return bestCell;
+    }
+
+    private static int countCandidates(int[][] board, int row, int col) {
+
+        int count = 0;
+    
+        for (int num = 1; num <= 9; num++) {
+            if (isValidMove(board, row, col, num)) {
+                count++;
+            }
+        }
+    
+        return count;
     }
 }
 
