@@ -29,7 +29,7 @@ public class SudokuGame {
 
         try (Scanner sc = new Scanner(System.in)) {
             while (true) {
-                System.out.print(renderer.render(board, board.isPuzzleStarted()));
+                renderer.render(board, board.isPuzzleStarted());
 
                 if (SudokuValidator.isCompleteAndValid(board.toArrayCopy())) {
                     System.out.println("You have successfully completed the Sudoku puzzle!");
@@ -60,3 +60,4 @@ public class SudokuGame {
         }
     }
 }
+

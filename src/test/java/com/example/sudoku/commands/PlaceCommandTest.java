@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.example.sudoku.Board;
 import com.example.sudoku.utils.SudokuGenerator;
 
-public class SetCellCommandTest {
+public class PlaceCommandTest {
     private Board board;
     private int[][] solution;
     private Random rand;
@@ -32,7 +32,7 @@ public class SetCellCommandTest {
 
     @Test
     void placeCommand_whenValidEmptyCell_thenUpdatesBoardAndReturnsSuccessMessage() {
-        SetCellCommand cmd = new SetCellCommand("A1", "5");
+        PlaceCommand cmd = new PlaceCommand("A1", "5");
         CommandResult result = cmd.execute(board, solution, null);
 
         assertTrue(result.success);
@@ -44,7 +44,7 @@ public class SetCellCommandTest {
     @Test
     void placeCommand_whenPrefilledCell_thenRejectsWithoutChange() {
         board.setPrefilled(0, 0, true);
-        SetCellCommand cmd = new SetCellCommand("A1", "5");
+        PlaceCommand cmd = new PlaceCommand("A1", "5");
 
         CommandResult result = cmd.execute(board, solution, null);
 
@@ -56,7 +56,7 @@ public class SetCellCommandTest {
 
     @Test
     void placeCommand_whenInvalidCellFormat_thenReturnsErrorMessage() {
-        SetCellCommand cmd = new SetCellCommand("J10", "5");
+        PlaceCommand cmd = new PlaceCommand("J10", "5");
 
         CommandResult result = cmd.execute(board, solution, null);
 
@@ -67,7 +67,7 @@ public class SetCellCommandTest {
 
     @Test
     void placeCommand_whenInvalidNumber_thenRejects() {
-        SetCellCommand cmd = new SetCellCommand("A1", "0");
+        PlaceCommand cmd = new PlaceCommand("A1", "0");
 
         CommandResult result = cmd.execute(board, solution, null);
 
@@ -80,7 +80,7 @@ public class SetCellCommandTest {
     @Test
     void placeCommand_whenDuplicateMove_thenAcceptsButCheckWillReport() {
         board.set(0, 1, 5);
-        SetCellCommand cmd = new SetCellCommand("A1", "5");
+        PlaceCommand cmd = new PlaceCommand("A1", "5");
 
         CommandResult result = cmd.execute(board, solution, null);
 

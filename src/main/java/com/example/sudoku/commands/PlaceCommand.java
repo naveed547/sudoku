@@ -5,11 +5,11 @@ import java.util.Scanner;
 import com.example.sudoku.Board;
 import com.example.sudoku.utils.SudokuValidator;
 
-public class SetCellCommand implements Command {
+public class PlaceCommand implements Command {
     private final String cell;
     private final String valueToken;
 
-    public SetCellCommand(String cell, String valueToken) {
+    public PlaceCommand(String cell, String valueToken) {
         this.cell = cell;
         this.valueToken = valueToken;
     }
@@ -42,4 +42,3 @@ public class SetCellCommand implements Command {
         return CommandResult.continueGame("\nPlaced " + val + " at " + cell.toUpperCase() + "\n");
     }
 }
-

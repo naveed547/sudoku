@@ -46,18 +46,7 @@ public class SudokuGenerator {
     }
 
     private boolean canPlace(int[][] b, int r, int c, int val) {
-        for (int j = 0; j < Board.SIZE; j++)
-            if (b[r][j] == val)
-                return false;
-        for (int i = 0; i < Board.SIZE; i++)
-            if (b[i][c] == val)
-                return false;
-        int br = (r / 3) * 3, bc = (c / 3) * 3;
-        for (int i = br; i < br + 3; i++)
-            for (int j = bc; j < bc + 3; j++)
-                if (b[i][j] == val)
-                    return false;
-        return true;
+        return SudokuValidator.isValidMove(b, r, c, val);
     }
 
     /**

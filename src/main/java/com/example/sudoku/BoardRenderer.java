@@ -6,9 +6,10 @@ public class BoardRenderer {
      * Render the board to a string using the legacy display formatting.
      * @param board the board to render
      * @param puzzleStarted whether to show "Current grid:" instead of "Here is your puzzle:"
-     * @return the rendered board as a string
+
+
      */
-    public String render(Board board, boolean puzzleStarted) {
+    public void render(Board board, boolean puzzleStarted) {
         StringBuilder sb = new StringBuilder();
 
         sb.append(puzzleStarted ? "Current grid:" : "Here is your puzzle:").append('\n');
@@ -33,6 +34,8 @@ public class BoardRenderer {
             }
         }
 
-        return sb.toString() + "\n";
+        sb.append("\nEnter command (eg: A3 4, clear C5, hint, check, quit, help): ");
+
+        System.out.println(sb.toString() + "\n");
     }
 }
