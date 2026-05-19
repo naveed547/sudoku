@@ -49,7 +49,7 @@ quit       Exit the game
 
 ## Example
 ```text
-Enter command (eg: A3 4 , clear C5 , hint , check , quit):
+Enter command (eg: A3 4, C5 clear, hint, check, quit):
 ```
 
 ## Notes on performance / determinism

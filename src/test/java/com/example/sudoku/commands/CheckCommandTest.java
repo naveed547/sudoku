@@ -1,16 +1,16 @@
 package com.example.sudoku.commands;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import com.example.sudoku.Board;
 import com.example.sudoku.utils.SudokuGenerator;
 
-public class ValidateBoardCommandTest {
+public class CheckCommandTest {
     private Board board;
     private Random rand;
     private int[][] solution;
@@ -32,7 +32,7 @@ public class ValidateBoardCommandTest {
             }
         }
 
-        ValidateBoardCommand cmd = new ValidateBoardCommand();
+        CheckCommand cmd = new CheckCommand();
         CommandResult result = cmd.execute(board, null, null);
 
         assertTrue(result.success);
@@ -46,7 +46,7 @@ public class ValidateBoardCommandTest {
         board.set(0, 0, 1);
         board.set(0, 1, 1);
 
-        ValidateBoardCommand cmd = new ValidateBoardCommand();
+        CheckCommand cmd = new CheckCommand();
         CommandResult result = cmd.execute(board, null, null);
 
         assertTrue(result.success);
@@ -60,7 +60,7 @@ public class ValidateBoardCommandTest {
         board.set(0, 0, 1);
         board.set(1, 0, 1);
 
-        ValidateBoardCommand cmd = new ValidateBoardCommand();
+        CheckCommand cmd = new CheckCommand();
         CommandResult result = cmd.execute(board, null, null);
 
         assertTrue(result.success);
@@ -74,7 +74,7 @@ public class ValidateBoardCommandTest {
         board.set(0, 0, 1);
         board.set(1, 1, 1);
 
-        ValidateBoardCommand cmd = new ValidateBoardCommand();
+        CheckCommand cmd = new CheckCommand();
         CommandResult result = cmd.execute(board, null, null);
 
         assertTrue(result.success);
@@ -89,7 +89,7 @@ public class ValidateBoardCommandTest {
         board.set(0, 1, 1);
         board.set(1, 0, 1);
 
-        ValidateBoardCommand cmd = new ValidateBoardCommand();
+        CheckCommand cmd = new CheckCommand();
         CommandResult result = cmd.execute(board, null, null);
 
         assertTrue(result.success);
@@ -99,4 +99,3 @@ public class ValidateBoardCommandTest {
         assertTrue(result.message.toLowerCase().contains("duplicate 1 in column"));
     }
 }
-

@@ -15,7 +15,7 @@ public class CommandFactory {
     private static final Map<String, Supplier<Command>> COMMANDS = Map.of(
             "quit", QuitCommand::new,
             "hint", HintCommand::new,
-            "check", ValidateBoardCommand::new,
+            "check", CheckCommand::new,
             "help", HelpCommand::new);
 
     private static final Map<String, Function<String, Command>> ARG_COMMANDS = Map.of(

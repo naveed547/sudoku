@@ -23,7 +23,7 @@ class CommandFactoryTest {
     void parse_basicCommands() {
         assertParsesTo("quit", QuitCommand.class);
         assertParsesTo("hint", HintCommand.class);
-        assertParsesTo("check", ValidateBoardCommand.class);
+        assertParsesTo("check", CheckCommand.class);
         assertParsesTo("help", HelpCommand.class);
     }
 
@@ -59,7 +59,7 @@ class CommandFactoryTest {
     void parse_caseInsensitivityForNoArgCommands() {
         assertParsesTo("QUIT", QuitCommand.class);
         assertParsesTo("HINT", HintCommand.class);
-        assertParsesTo("CHECK", ValidateBoardCommand.class);
+        assertParsesTo("CHECK", CheckCommand.class);
         assertParsesTo("HELP", HelpCommand.class);
     }
 
