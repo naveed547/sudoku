@@ -11,7 +11,7 @@ public class HelpCommandTest {
         HelpCommand cmd = new HelpCommand();
         Board board = new Board();
 
-        CommandResult result = cmd.execute(board, null, null);
+        CommandResult result = cmd.execute(board);
 
         assertTrue(result.success);
         assertNotNull(result.message);
@@ -29,7 +29,7 @@ public class HelpCommandTest {
         HelpCommand cmd = new HelpCommand();
         Board board = new Board();
 
-        CommandResult result = cmd.execute(board, null, null);
+        CommandResult result = cmd.execute(board);
 
         assertTrue(result.success);
     }

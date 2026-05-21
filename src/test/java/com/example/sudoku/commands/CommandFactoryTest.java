@@ -3,18 +3,14 @@ package com.example.sudoku.commands;
 import com.example.sudoku.Board;
 import org.junit.jupiter.api.Test;
 
-import java.util.Scanner;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class CommandFactoryTest {
 
     private final Board board = new Board();
-    private final int[][] solution = new int[9][9];
-    private final Scanner sc = new Scanner(System.in);
 
     private void assertParsesTo(String input, Class<? extends Command> expected) {
-        Command cmd = CommandFactory.parse(input, board, solution, sc);
+        Command cmd = CommandFactory.parse(input, board);
         assertNotNull(cmd);
         assertInstanceOf(expected, cmd);
     }
@@ -84,18 +80,18 @@ class CommandFactoryTest {
 
     @Test
     void parse_nullOrEmpty_returnsUnknownCommand() {
-        assertInstanceOf(UnknownCommand.class, CommandFactory.parse(null, board, solution, sc));
-        assertInstanceOf(UnknownCommand.class, CommandFactory.parse("", board, solution, sc));
-        assertInstanceOf(UnknownCommand.class, CommandFactory.parse("   ", board, solution, sc));
+        assertInstanceOf(UnknownCommand.class, CommandFactory.parse(null, board));
+        assertInstanceOf(UnknownCommand.class, CommandFactory.parse("", board));
+        assertInstanceOf(UnknownCommand.class, CommandFactory.parse("   ", board));
     }
 
     @Test
     void performance_parse_manyInputs_noExceptions() {
         // Avoid strict timing thresholds to prevent flaky tests.
         for (int i = 0; i < 50_000; i++) {
-            CommandFactory.parse((i % 2 == 0 ? "hint" : "A1 5"), board, solution, sc);
-            CommandFactory.parse("clear A1", board, solution, sc);
-            CommandFactory.parse("unknown_command", board, solution, sc);
+            CommandFactory.parse((i % 2 == 0 ? "hint" : "A1 5"), board);
+            CommandFactory.parse("clear A1", board);
+            CommandFactory.parse("unknown_command", board);
         }
     }
 }

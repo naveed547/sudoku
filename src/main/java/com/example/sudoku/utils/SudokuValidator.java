@@ -38,7 +38,7 @@ public class SudokuValidator {
         return true;
     }
 
-    // Validate the whole board and return a list of human readable problems found
+    // Validate the whole board and return a list of human readable problems found.
     public static List<String> validateWholeBoard(int[][] board) {
         List<String> problems = new ArrayList<>();
         // rows
@@ -80,7 +80,44 @@ public class SudokuValidator {
         for (int r = 0; r < Board.SIZE; r++)
             for (int c = 0; c < Board.SIZE; c++)
                 if (board[r][c] == 0) return false;
-        return validateWholeBoard(board).isEmpty();
+        return !hasProblems(board);
+    }
+
+    // Returns as soon as the first problem is found — caller only needs yes/no.
+    private static boolean hasProblems(int[][] board) {
+        // rows
+        for (int r = 0; r < Board.SIZE; r++) {
+            boolean[] seen = new boolean[Board.SIZE + 1];
+            for (int c = 0; c < Board.SIZE; c++) {
+                int val = board[r][c];
+                if (val == 0) continue;
+                if (seen[val]) return true;
+                seen[val] = true;
+            }
+        }
+        // cols
+        for (int c = 0; c < Board.SIZE; c++) {
+            boolean[] seen = new boolean[Board.SIZE + 1];
+            for (int r = 0; r < Board.SIZE; r++) {
+                int val = board[r][c];
+                if (val == 0) continue;
+                if (seen[val]) return true;
+                seen[val] = true;
+            }
+        }
+        // boxes
+        for (int br = 0; br < Board.SIZE; br += 3)
+            for (int bc = 0; bc < Board.SIZE; bc += 3) {
+                boolean[] seen = new boolean[Board.SIZE + 1];
+                for (int r = br; r < br + 3; r++)
+                    for (int c = bc; c < bc + 3; c++) {
+                        int val = board[r][c];
+                        if (val == 0) continue;
+                        if (seen[val]) return true;
+                        seen[val] = true;
+                    }
+            }
+        return false;
     }
 
     /**
@@ -101,8 +138,8 @@ public class SudokuValidator {
     private static int countSolutionsBacktrack(int[][] board, int limit) {
         int[] next = findBestCell(board);
         if (next == null) {
-            // complete grid; ensure no duplicates
-            return validateWholeBoard(board).isEmpty() ? 1 : 0;
+            // complete grid; use hasProblems for fast yes/no
+            return hasProblems(board) ? 0 : 1;
         }
 
         int r = next[0], c = next[1];

@@ -31,7 +31,7 @@ public class ClearCommandTest {
         board.setPrefilled(0, 0, false);
 
         ClearCommand cmd = new ClearCommand("A1");
-        CommandResult result = cmd.execute(board, null, null);
+        CommandResult result = cmd.execute(board);
 
         assertTrue(result.success);
         assertNotNull(result.message);
@@ -45,7 +45,7 @@ public class ClearCommandTest {
         board.set(0, 0, 7);
 
         ClearCommand cmd = new ClearCommand("A1");
-        CommandResult result = cmd.execute(board, null, null);
+        CommandResult result = cmd.execute(board);
 
         assertTrue(result.success);
         assertNotNull(result.message);
@@ -56,7 +56,7 @@ public class ClearCommandTest {
     @Test
     void clearCommand_whenAlreadyEmptyCell_thenShowsAlreadyEmpty() {
         ClearCommand cmd = new ClearCommand("A1");
-        CommandResult result = cmd.execute(board, null, null);
+        CommandResult result = cmd.execute(board);
 
         assertTrue(result.success);
         assertNotNull(result.message);
@@ -67,7 +67,7 @@ public class ClearCommandTest {
     @Test
     void clearCommand_whenInvalidCell_thenShowsError() {
         ClearCommand cmd = new ClearCommand("Z9");
-        CommandResult result = cmd.execute(board, null, null);
+        CommandResult result = cmd.execute(board);
 
         assertTrue(result.success);
         assertNotNull(result.message);

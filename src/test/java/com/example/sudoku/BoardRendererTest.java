@@ -5,20 +5,20 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BoardRendererTest {
 
     @Test
     void printWelcome_printsWelcomeText() {
-        BoardRenderer renderer = new BoardRenderer();
+        Board board = new Board();
 
         PrintStream originalOut = System.out;
         ByteArrayOutputStream capture = new ByteArrayOutputStream();
         System.setOut(new PrintStream(capture));
 
         try {
-            renderer.printWelcome();
+            board.printWelcome();
         } finally {
             System.setOut(originalOut);
         }
@@ -32,14 +32,14 @@ public class BoardRendererTest {
 
     @Test
     void printCompletionSuccess_printsCompletionPrompt() {
-        BoardRenderer renderer = new BoardRenderer();
+        Board board = new Board();
 
         PrintStream originalOut = System.out;
         ByteArrayOutputStream capture = new ByteArrayOutputStream();
         System.setOut(new PrintStream(capture));
 
         try {
-            renderer.printCompletionSuccess();
+            board.printCompletionSuccess();
         } finally {
             System.setOut(originalOut);
         }
@@ -57,7 +57,6 @@ public class BoardRendererTest {
 
     @Test
     void render_whenPuzzleStartedTrue_printsCurrentGridHeader_andPrompt_andIncludesBoardContent() {
-        BoardRenderer renderer = new BoardRenderer();
         Board board = new Board();
         board.set(0, 0, 5); // row A, col 1
 
@@ -66,17 +65,17 @@ public class BoardRendererTest {
         System.setOut(new PrintStream(capture));
 
         try {
-            renderer.render(board, true);
+            board.render(true);
         } finally {
             System.setOut(originalOut);
         }
 
         String out = capture.toString();
 
-        assertTrue(out.contains("Current grid:"), "render(..., true) should show Current grid header");
+        assertTrue(out.contains("Current grid:"), "render(true) should show Current grid header");
         assertTrue(out.contains("1 2 3 | 4 5 6 | 7 8 9"), "render should include column header");
         assertTrue(
-                out.contains("Enter command (eg: A3 4, clear C5, hint, check, quit, help): "),
+                out.contains("Enter command (eg: A3 4, C5 clear, hint, check, quit, help): "),
                 "render should include command prompt"
         );
 
@@ -87,7 +86,6 @@ public class BoardRendererTest {
 
     @Test
     void render_whenPuzzleStartedFalse_printsHereIsYourPuzzleHeader_andPrompt_andIncludesBoardContent() {
-        BoardRenderer renderer = new BoardRenderer();
         Board board = new Board();
         board.set(8, 8, 9); // row I, col 9
 
@@ -96,17 +94,17 @@ public class BoardRendererTest {
         System.setOut(new PrintStream(capture));
 
         try {
-            renderer.render(board, false);
+            board.render(false);
         } finally {
             System.setOut(originalOut);
         }
 
         String out = capture.toString();
 
-        assertTrue(out.contains("Here is your puzzle:"), "render(..., false) should show Here is your puzzle header");
+        assertTrue(out.contains("Here is your puzzle:"), "render(false) should show Here is your puzzle header");
         assertTrue(out.contains("1 2 3 | 4 5 6 | 7 8 9"), "render should include column header");
         assertTrue(
-                out.contains("Enter command (eg: A3 4, clear C5, hint, check, quit, help): "),
+                out.contains("Enter command (eg: A3 4, C5 clear, hint, check, quit, help): "),
                 "render should include command prompt"
         );
 

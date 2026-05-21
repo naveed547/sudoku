@@ -1,7 +1,5 @@
 package com.example.sudoku.commands;
 
-import java.util.Scanner;
-
 import com.example.sudoku.Board;
 import com.example.sudoku.utils.SudokuValidator;
 
@@ -15,7 +13,7 @@ public class PlaceCommand implements Command {
     }
 
     @Override
-    public CommandResult execute(Board board, int[][] solution, Scanner sc) {
+    public CommandResult execute(Board board) {
         int[] rc = SudokuValidator.parseCell(cell);
         if (rc == null) {
             return CommandResult.continueGame("\nInvalid cell reference.\n");
@@ -38,7 +36,16 @@ public class PlaceCommand implements Command {
 
         // Accept the move even if it creates a rule violation.
         // The player will learn/see violations when they run `check`.
-        board.set(r, c, val);
+        boolean ok = board.placeValue(r, c, val);
+        if (!ok) {
+            return CommandResult.continueGame("\nCannot place value on that cell.\n");
+        }
+
         return CommandResult.continueGame("\nPlaced " + val + " at " + cell.toUpperCase() + "\n");
     }
+
+    public static Command parse(String[] t) {
+        return (t.length == 2 && t[1].matches("\\d+")) ? new PlaceCommand(t[0], t[1]) : null;
+    }
 }
+

@@ -12,7 +12,7 @@ public class UnknownCommandTest {
         UnknownCommand cmd = new UnknownCommand();
         Board board = new Board();
 
-        CommandResult result = cmd.execute(board, null, null);
+        CommandResult result = cmd.execute(board);
 
         assertTrue(result.success);
         assertNotNull(result.message);
@@ -24,16 +24,16 @@ public class UnknownCommandTest {
         UnknownCommand cmd = new UnknownCommand();
         Board board = new Board();
 
-        CommandResult result = cmd.execute(board, null, null);
+        CommandResult result = cmd.execute(board);
 
         assertTrue(result.success);
     }
 
     @Test
-    void unknownCommand_safeForAllInputs() {
+    void unknownCommand_independentOfBoard() {
         UnknownCommand cmd = new UnknownCommand();
 
-        CommandResult result = cmd.execute(null, null, null);
+        CommandResult result = cmd.execute(null);
 
         assertTrue(result.success);
     }

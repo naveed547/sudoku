@@ -501,8 +501,7 @@ private static int countCandidates(int[][] board, int row, int col) {
 
 ```java
 public interface Command {
-    // Executes command with access to board state and solution
-    CommandResult execute(Board board, int[][] solution, Scanner sc);
+    CommandResult execute(Board board);
 }
 ```
 
@@ -523,40 +522,33 @@ public class CommandResult {
 **File:** `src/main/java/com/example/sudoku/commands/CommandFactory.java`
 
 ```java
-// Lines 15–19: No-argument commands (keyword → constructor reference)
-private static final Map<String, Supplier<Command>> COMMANDS = Map.of(
+// Single-word commands (no args): keyword -> constructor reference
+private static final Map<String, Supplier<Command>> SIMPLE_COMMANDS = Map.of(
+    "help", HelpCommand::new,
     "quit", QuitCommand::new,
     "hint", HintCommand::new,
-    "check", CheckCommand::new,
-    "help", HelpCommand::new);
+    "check", CheckCommand::new);
 
-// Lines 21–22: One-argument commands (cell-based, e.g., "A1 clear")
-private static final Map<String, Function<String, Command>> ARG_COMMANDS = Map.of(
-    "clear", ClearCommand::new);
-
-// Lines 24–56: Parse input line into appropriate Command object
-public static Command parse(String line, Board board, int[][] solution, Scanner sc) {
+public static Command parse(String line, Board board) {
     if (line == null || line.isBlank()) return new UnknownCommand();
 
-    String[] parts = line.trim().split("\\s+");
-    String cmd = parts[0].toLowerCase();
+    String[] tokens = line.trim().split("\\s+");
 
-    // Lines 34–39: Check no-arg commands (quit, hint, check, help)
-    Supplier<Command> noArg = COMMANDS.get(cmd);
-    if (noArg != null) {
-        return parts.length == 1 ? noArg.get() : new UnknownCommand();
+    // ------------------------------------
+    // Single-word commands
+    // ------------------------------------
+    if (tokens.length == 1) {
+        Supplier<Command> supplier = SIMPLE_COMMANDS.get(tokens[0].toLowerCase());
+        return supplier != null ? supplier.get() : new UnknownCommand();
     }
 
-    // Lines 42–48: Handle "A5 clear" pattern (cell + action)
-    if (parts.length == 2 && "clear".equalsIgnoreCase(parts[1])) {
-        Function<String, Command> oneArg = ARG_COMMANDS.get(parts[1].toLowerCase());
-        if (oneArg != null) return oneArg.apply(parts[0]);
-    }
-
-    // Lines 51–53: Handle "A5 7" pattern (cell + number)
-    if (parts.length == 2 && parts[1].matches("\\d+")) {
-        return new PlaceCommand(parts[0], parts[1]);
-    }
+    // ------------------------------------
+    // Multi-token commands
+    //   - clear: Example "A1 clear"
+    //   - place: Example "A1 5"
+    // ------------------------------------
+    if (ClearCommand.parse(tokens) != null) return ClearCommand.parse(tokens);
+    if (PlaceCommand.parse(tokens) != null) return PlaceCommand.parse(tokens);
 
     return new UnknownCommand();
 }
@@ -566,19 +558,26 @@ public static Command parse(String line, Board board, int[][] solution, Scanner 
 **File:** `src/main/java/com/example/sudoku/commands/PlaceCommand.java`
 
 ```java
-// Lines 19–22: Parse cell coordinate
 int[] rc = SudokuValidator.parseCell(cell);
 if (rc == null) return CommandResult.continueGame("\nInvalid cell reference.\n");
 
-// Lines 24–26: Reject attempts to modify prefilled cells
 if (board.isPrefilled(r, c)) return CommandResult.continueGame("\nCannot modify a prefilled cell.\n");
 
-// Lines 28–37: Parse and validate number (1–9)
-int val = Integer.parseInt(valueToken);
-if (val < 1 || val > 9) return CommandResult.continueGame("\nNumber must be between 1 and 9.\n");
+int val;
+try { val = Integer.parseInt(valueToken); }
+catch (NumberFormatException e) {
+    return CommandResult.continueGame("\nSecond token must be a number 1-9.\n");
+}
 
-// Lines 39–42: Accept move even if it violates rules (player learns via `check`)
-board.set(r, c, val);
+if (val < 1 || val > 9) {
+    return CommandResult.continueGame("\nNumber must be between 1 and 9.\n");
+}
+
+boolean ok = board.placeValue(r, c, val);
+if (!ok) {
+    return CommandResult.continueGame("\nCannot place value on that cell.\n");
+}
+
 return CommandResult.continueGame("\nPlaced " + val + " at " + cell.toUpperCase() + "\n");
 ```
 
@@ -586,11 +585,22 @@ return CommandResult.continueGame("\nPlaced " + val + " at " + cell.toUpperCase(
 **File:** `src/main/java/com/example/sudoku/commands/ClearCommand.java`
 
 ```java
-// Lines 16–19: Parse cell reference
-// Lines 21–23: Reject clearing prefilled cells
-// Lines 24–26: Reject clearing already-empty cells
-// Line 27: Perform the clear
-board.clear(r, c);
+int[] rc = SudokuValidator.parseCell(cell);
+if (rc == null) return CommandResult.continueGame("\nInvalid cell reference.\n");
+
+if (board.isPrefilled(r, c)) {
+    return CommandResult.continueGame("\nCannot clear a prefilled cell.\n");
+}
+
+if (board.get(r, c) == 0) {
+    return CommandResult.continueGame("\nCell already empty.\n");
+}
+
+boolean ok = board.clearCell(r, c);
+if (!ok) {
+    return CommandResult.continueGame("\nCell could not be cleared.\n");
+}
+
 return CommandResult.continueGame("\nCleared " + cell.toUpperCase() + "\n");
 ```
 
@@ -598,26 +608,33 @@ return CommandResult.continueGame("\nCleared " + cell.toUpperCase() + "\n");
 **File:** `src/main/java/com/example/sudoku/commands/HintCommand.java`
 
 ```java
-// Lines 14–17: Find any empty non-prefilled cell
 List<int[]> empties = board.getEmptyNonPrefilledCells();
-if (empties.isEmpty()) return CommandResult.continueGame("\nNo available hints.\n");
+if (empties.isEmpty()) {
+    return CommandResult.continueGame("\nNo available hints.\n");
+}
 
-// Line 18: Pick random empty cell
 int[] cell = empties.get(HintCommand.RNG.nextInt(empties.size()));
 
-// Lines 20–25: Fill in the solution value and tell the player
-board.set(r, c, solution[r][c]);
-return CommandResult.continueGame("\nHint: cell " + (char) ('A' + r) + (c + 1) + " = " + solution[r][c] + "\n");
+int r = cell[0], c = cell[1];
+int val = board.getSolution()[r][c];
+
+boolean ok = board.applyHint(r, c, val);
+if (!ok) {
+    return CommandResult.continueGame("\nNo available hints.\n");
+}
+
+return CommandResult.continueGame(
+    "\nHint: cell " + (char) ('A' + r) + (c + 1) + " = " + val + "\n"
+);
 ```
 
 ### CheckCommand
 **File:** `src/main/java/com/example/sudoku/commands/CheckCommand.java`
 
 ```java
-// Line 14: Validate entire board and collect problems
 List<String> problems = SudokuValidator.validateWholeBoard(board.toArrayCopy());
 
-// Lines 17–24: Format output — either "No rule violations" or list of problems
+StringBuilder sb = new StringBuilder();
 if (problems.isEmpty()) {
     sb.append("No rule violations detected.");
 } else {
@@ -630,13 +647,11 @@ return CommandResult.continueGame("\n" + sb + "\n");
 
 ### QuitCommand
 ```java
-// Always returns quit result, breaking the game loop
 return CommandResult.quit("\nQuitting. Bye! \n");
 ```
 
 ### HelpCommand
 ```java
-// Returns formatted string listing all available commands
 return CommandResult.continueGame(sb.toString());
 ```
 
@@ -660,10 +675,10 @@ mvn test
 ```
 User Input (e.g., "A3 5")
     ↓
-CommandFactory.parse() → PlaceCommand instance
+CommandFactory.parse(line, board) → PlaceCommand instance
     ↓
-cmd.execute(board, solution, sc)
-    ├── board.set(r, c, val)   ← Mutates state
+cmd.execute(board) 
+    ├── mutates board state (place/clear/hint)
     └── returns CommandResult(message, success)
     ↓
 SudokuGame prints result.message

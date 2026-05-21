@@ -33,7 +33,7 @@ public class CheckCommandTest {
         }
 
         CheckCommand cmd = new CheckCommand();
-        CommandResult result = cmd.execute(board, null, null);
+        CommandResult result = cmd.execute(board);
 
         assertTrue(result.success);
         assertNotNull(result.message);
@@ -47,7 +47,7 @@ public class CheckCommandTest {
         board.set(0, 1, 1);
 
         CheckCommand cmd = new CheckCommand();
-        CommandResult result = cmd.execute(board, null, null);
+        CommandResult result = cmd.execute(board);
 
         assertTrue(result.success);
         assertNotNull(result.message);
@@ -61,7 +61,7 @@ public class CheckCommandTest {
         board.set(1, 0, 1);
 
         CheckCommand cmd = new CheckCommand();
-        CommandResult result = cmd.execute(board, null, null);
+        CommandResult result = cmd.execute(board);
 
         assertTrue(result.success);
         assertNotNull(result.message);
@@ -75,7 +75,7 @@ public class CheckCommandTest {
         board.set(1, 1, 1);
 
         CheckCommand cmd = new CheckCommand();
-        CommandResult result = cmd.execute(board, null, null);
+        CommandResult result = cmd.execute(board);
 
         assertTrue(result.success);
         assertNotNull(result.message);
@@ -90,7 +90,7 @@ public class CheckCommandTest {
         board.set(1, 0, 1);
 
         CheckCommand cmd = new CheckCommand();
-        CommandResult result = cmd.execute(board, null, null);
+        CommandResult result = cmd.execute(board);
 
         assertTrue(result.success);
         assertNotNull(result.message);

@@ -33,7 +33,7 @@ public class PlaceCommandTest {
     @Test
     void placeCommand_whenValidEmptyCell_thenUpdatesBoardAndReturnsSuccessMessage() {
         PlaceCommand cmd = new PlaceCommand("A1", "5");
-        CommandResult result = cmd.execute(board, solution, null);
+        CommandResult result = cmd.execute(board);
 
         assertTrue(result.success);
         assertNotNull(result.message);
@@ -46,7 +46,7 @@ public class PlaceCommandTest {
         board.setPrefilled(0, 0, true);
         PlaceCommand cmd = new PlaceCommand("A1", "5");
 
-        CommandResult result = cmd.execute(board, solution, null);
+        CommandResult result = cmd.execute(board);
 
         assertTrue(result.success);
         assertNotNull(result.message);
@@ -58,7 +58,7 @@ public class PlaceCommandTest {
     void placeCommand_whenInvalidCellFormat_thenReturnsErrorMessage() {
         PlaceCommand cmd = new PlaceCommand("J10", "5");
 
-        CommandResult result = cmd.execute(board, solution, null);
+        CommandResult result = cmd.execute(board);
 
         assertTrue(result.success);
         assertNotNull(result.message);
@@ -69,7 +69,7 @@ public class PlaceCommandTest {
     void placeCommand_whenInvalidNumber_thenRejects() {
         PlaceCommand cmd = new PlaceCommand("A1", "0");
 
-        CommandResult result = cmd.execute(board, solution, null);
+        CommandResult result = cmd.execute(board);
 
         assertTrue(result.success);
         assertNotNull(result.message);
@@ -82,7 +82,7 @@ public class PlaceCommandTest {
         board.set(0, 1, 5);
         PlaceCommand cmd = new PlaceCommand("A1", "5");
 
-        CommandResult result = cmd.execute(board, solution, null);
+        CommandResult result = cmd.execute(board);
 
         assertTrue(result.success);
         assertNotNull(result.message);

@@ -1,6 +1,5 @@
 package com.example.sudoku.commands;
 
-import java.util.Scanner;
 import com.example.sudoku.Board;
 import com.example.sudoku.utils.SudokuValidator;
 
@@ -12,7 +11,7 @@ public class ClearCommand implements Command {
     }
 
     @Override
-    public CommandResult execute(Board board, int[][] solution, Scanner sc) {
+    public CommandResult execute(Board board) {
         int[] rc = SudokuValidator.parseCell(cell);
         if (rc == null) {
             return CommandResult.continueGame("\nInvalid cell reference.\n");
@@ -24,8 +23,17 @@ public class ClearCommand implements Command {
         if (board.get(r, c) == 0) {
             return CommandResult.continueGame("\nCell already empty.\n");
         }
-        board.clear(r, c);
+
+        boolean ok = board.clearCell(r, c);
+        if (!ok) {
+            return CommandResult.continueGame("\nCell could not be cleared.\n");
+        }
+
         return CommandResult.continueGame("\nCleared " + cell.toUpperCase() + "\n");
+    }
+
+    public static Command parse(String[] t) {
+        return (t.length == 2 && "clear".equalsIgnoreCase(t[1])) ? new ClearCommand(t[0]) : null;
     }
 }
 
