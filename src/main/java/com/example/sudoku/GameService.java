@@ -3,7 +3,8 @@ package com.example.sudoku;
 import com.example.sudoku.utils.SudokuGenerator;
 
 /**
- * GameService contains the puzzle generation flow, so Board can focus on state only.
+ * Puzzle generation service.
+ * Creates puzzles — does NOT own the game loop or board state.
  */
 public class GameService {
 
@@ -14,15 +15,16 @@ public class GameService {
     }
 
     /**
-     * Resets the provided board and generates a new puzzle.
-     * @return full solution for validation/hints
+     * Create a fresh board populated with a new puzzle.
+     * @return the newly created board
      */
-    public int[][] newPuzzle(Board board) {
+    public Board startNewGame() {
+        Board board = new Board();
         board.resetState();
 
         int[][] solution = generator.generateFullSolution();
         generator.createPuzzle(board, solution, Board.PREFILLED_COUNT);
-
-        return solution;
+        board.setSolution(solution);
+        return board;
     }
 }

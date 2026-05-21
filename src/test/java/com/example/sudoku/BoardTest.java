@@ -59,35 +59,89 @@ public class BoardTest {
     }
 
     @Test
-    void gameService_newPuzzle_twice_doesNotLeakPrefilledState() {
+    void placeValue_rejectsPrefilledCells() {
         Board b = new Board();
+        b.set(0, 0, 5);
+        b.setPrefilled(0, 0, true);
+
+        assertFalse(b.placeValue(0, 0, 3));
+        assertEquals(5, b.get(0, 0));
+        assertFalse(b.isPuzzleStarted());
+    }
+
+    @Test
+    void placeValue_rejectsInvalidValueOutside1to9() {
+        Board b = new Board();
+        assertFalse(b.placeValue(0, 0, 0));
+        assertFalse(b.placeValue(0, 0, 10));
+        assertEquals(0, b.get(0, 0));
+        assertFalse(b.isPuzzleStarted());
+    }
+
+    @Test
+    void placeValue_setsValueOnSuccess() {
+        Board b = new Board();
+        assertTrue(b.placeValue(0, 0, 7));
+        assertEquals(7, b.get(0, 0));
+    }
+
+    @Test
+    void clearCell_rejectsPrefilledCells() {
+        Board b = new Board();
+        b.set(0, 0, 7);
+        b.setPrefilled(0, 0, true);
+
+        assertFalse(b.clearCell(0, 0));
+        assertEquals(7, b.get(0, 0));
+    }
+
+    @Test
+    void clearCell_rejectsClearingAlreadyEmptyCell() {
+        Board b = new Board();
+        assertFalse(b.clearCell(0, 0));
+        assertEquals(0, b.get(0, 0));
+    }
+
+    @Test
+    void clearCell_clearsNonPrefilledNonEmptyCell() {
+        Board b = new Board();
+        b.set(0, 0, 7);
+        b.setPrefilled(0, 0, false);
+
+        assertTrue(b.clearCell(0, 0));
+        assertEquals(0, b.get(0, 0));
+    }
+
+    @Test
+    void gameService_startNewGame_twice_doesNotLeakPrefilledState() {
         GameService service = new GameService(new SudokuGenerator(new Random(1)));
 
-        int[][] solution1 = service.newPuzzle(b);
+        Board b1 = service.startNewGame();
         int prefCount1 = 0;
         for (int r = 0; r < Board.SIZE; r++) {
             for (int c = 0; c < Board.SIZE; c++) {
-                if (b.isPrefilled(r, c)) {
+                if (b1.isPrefilled(r, c)) {
                     prefCount1++;
-                    assertNotEquals(0, b.get(r, c), "Prefilled cells must have non-zero values after puzzle generation");
+                    assertNotEquals(0, b1.get(r, c), "Prefilled cells must have non-zero values after puzzle generation");
                 }
             }
         }
         assertEquals(Board.PREFILLED_COUNT, prefCount1, "First puzzle should mark requested number of prefilled cells");
 
-        int[][] solution2 = service.newPuzzle(b);
+        Board b2 = service.startNewGame();
         int prefCount2 = 0;
         for (int r = 0; r < Board.SIZE; r++) {
             for (int c = 0; c < Board.SIZE; c++) {
-                if (b.isPrefilled(r, c)) {
+                if (b2.isPrefilled(r, c)) {
                     prefCount2++;
-                    assertNotEquals(0, b.get(r, c), "Prefilled cells must have non-zero values after second puzzle generation");
+                    assertNotEquals(0, b2.get(r, c), "Prefilled cells must have non-zero values after second puzzle generation");
                 }
             }
         }
         assertEquals(Board.PREFILLED_COUNT, prefCount2, "Second puzzle should re-mark requested number of prefilled cells");
 
-        assertEquals(9, solution1.length);
-        assertEquals(9, solution2.length);
+        assertEquals(9, b1.getSolution().length);
+        assertEquals(9, b2.getSolution().length);
     }
 }
+

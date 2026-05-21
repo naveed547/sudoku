@@ -24,6 +24,7 @@ public class HintCommandTest {
         SudokuGenerator gen = new SudokuGenerator(rand);
         solution = gen.generateFullSolution();
         gen.createPuzzle(board, solution, 30);
+        board.setSolution(solution);
     }
 
     @Test
@@ -31,7 +32,7 @@ public class HintCommandTest {
         int beforeEmpties = board.getEmptyNonPrefilledCells().size();
 
         HintCommand cmd = new HintCommand();
-        CommandResult result = cmd.execute(board, solution, null);
+        CommandResult result = cmd.execute(board);
 
         assertTrue(result.success);
         assertNotNull(result.message);
@@ -45,11 +46,14 @@ public class HintCommandTest {
     void hintCommand_whenNoEmptyNonPrefilled_thenShowsNoHintsAvailable() {
         List<int[]> empties = board.getEmptyNonPrefilledCells();
         for (int[] cell : empties) {
-            board.set(cell[0], cell[1], solution[cell[0]][cell[1]]);
+            // Fill all empty non-prefilled cells using the same domain mutation rules as gameplay.
+            boolean ok = board.placeValue(cell[0], cell[1], solution[cell[0]][cell[1]]);
+            assertTrue(ok);
         }
 
+
         HintCommand cmd = new HintCommand();
-        CommandResult result = cmd.execute(board, solution, null);
+        CommandResult result = cmd.execute(board);
 
         assertTrue(result.success);
         assertNotNull(result.message);
@@ -62,7 +66,7 @@ public class HintCommandTest {
         assertFalse(beforeEmpties.isEmpty());
 
         HintCommand cmd = new HintCommand();
-        CommandResult result = cmd.execute(board, solution, null);
+        CommandResult result = cmd.execute(board);
 
         assertTrue(result.success);
         assertNotNull(result.message);

@@ -12,7 +12,7 @@ public class QuitCommandTest {
         QuitCommand cmd = new QuitCommand();
         Board board = new Board();
 
-        CommandResult result = cmd.execute(board, null, null);
+        CommandResult result = cmd.execute(board);
 
         assertFalse(result.success);
         assertNotNull(result.message);
@@ -25,20 +25,9 @@ public class QuitCommandTest {
         board.set(0, 0, 5);
 
         QuitCommand cmd = new QuitCommand();
-        cmd.execute(board, null, null);
+        cmd.execute(board);
 
         assertEquals(5, board.get(0, 0));
-    }
-
-    @Test
-    void quitCommand_independentOfSolutionOrScanner() {
-        QuitCommand cmd = new QuitCommand();
-
-        CommandResult result1 = cmd.execute(null, null, null);
-        CommandResult result2 = cmd.execute(new Board(), new int[9][9], null);
-
-        assertFalse(result1.success);
-        assertFalse(result2.success);
     }
 }
 

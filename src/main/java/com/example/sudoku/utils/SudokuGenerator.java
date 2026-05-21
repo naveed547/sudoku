@@ -12,6 +12,10 @@ import com.example.sudoku.Board;
 public class SudokuGenerator {
     private final Random rand;
 
+    public SudokuGenerator() {
+        this.rand = new Random();
+    }
+
     public SudokuGenerator(Random rand) {
         this.rand = rand;
     }

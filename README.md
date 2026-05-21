@@ -8,10 +8,6 @@ Interactive 9x9 Sudoku game played in the terminal.
 - User moves are **accepted** (including moves that create duplicates).
 - Rule violations (row/column/3x3 box duplicates, and incomplete/invalid board) are reported when you run **`check`**.
 
-## Recent Changes
-- Standardised build/test/run where possible (Maven + shaded jar).
-- Fixed HintCommand to use the provided Random.
-
 
 ## Prerequisites
 - Java 11+
@@ -39,7 +35,7 @@ java -jar target/sudoku-1.0.0-shaded.jar
 ## Commands
 ```text
 A3 5       Place value 5 at cell A3 (unless the cell is prefilled)
-clear A3  Clear cell A3 (only if non-prefilled)
+A3 clear   Clear cell A3 (only if non-prefilled)
 hint       Fill one empty non-prefilled cell with its solution value
 check      Scan the current grid and report rule violations
 help       Print command help
@@ -67,24 +63,29 @@ mvn test
 ```text
 src/main/java/com/example/sudoku/
   Board.java
+  GameService.java
   SudokuGame.java
+  BoardRenderer.java
   commands/
+    CheckCommand.java
+    ClearCommand.java
     Command.java
     CommandFactory.java
-    PlaceCommand.java
-    ClearCommand.java
-    HintCommand.java
-    CheckCommand.java
+    CommandResult.java
     HelpCommand.java
+    HintCommand.java
+    PlaceCommand.java
     QuitCommand.java
     UnknownCommand.java
   utils/
-    SudokuUtils.java
     SudokuGenerator.java
+    SudokuValidator.java
 
 src/test/java/com/example/sudoku/
   BoardTest.java
+  BoardRendererTest.java
   commands/*Test.java
+  utils/*Test.java
 ```
 
 ## License

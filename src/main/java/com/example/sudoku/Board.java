@@ -3,9 +3,9 @@ package com.example.sudoku;
 import java.util.*;
 
 /**
- * Board model
- * Provides small helpers for reading/modifying cells and querying empties.
- */
+     * Board model
+     * Provides small helpers for reading/modifying cells and querying empties.
+     */
 public class Board {
     public static final int SIZE = 9;
     public static final int PREFILLED_COUNT = 30;
@@ -14,6 +14,16 @@ public class Board {
     private final boolean[][] prefilled = new boolean[SIZE][SIZE];
 
     private boolean puzzleStarted = false;
+
+    private int[][] solution;
+
+    public void setSolution(int[][] solution) {
+        this.solution = solution;
+    }
+
+    public int[][] getSolution() {
+        return solution;
+    }
 
     // Copy solution values into the board (used when creating a puzzle)
     public void copyFromSolution(int[][] solution) {
@@ -30,7 +40,7 @@ public class Board {
             Arrays.fill(board[r], 0);
             Arrays.fill(prefilled[r], false);
         }
-        puzzleStarted = false;
+        this.setPuzzleStarted(false);
     }
 
     public boolean isPuzzleStarted() {
@@ -42,10 +52,123 @@ public class Board {
     }
 
     public int get(int r, int c) { return board[r][c]; }
+
+    public void printWelcome() {
+        printLine("Welcome to Sudoku! (Prefilled cells are fixed and cannot be changed)");
+    }
+
+    public void printCompletionSuccess() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("You have successfully completed the Sudoku puzzle!");
+        sb.append(System.lineSeparator());
+        sb.append("Press ENTER to play again...");
+        printLine(sb.toString());
+    }
+
+    /**
+     * Render the board to stdout using the legacy display formatting.
+     * @param puzzleStarted whether to show "Current grid:" instead of "Here is your puzzle:"
+     */
+    public void render(boolean puzzleStarted) {
+        StringBuilder sb = new StringBuilder();
+        sb.append('\n');
+        sb.append(puzzleStarted ? "Current grid:" : "Here is your puzzle:").append('\n');
+        String colsHeader = "   1 2 3 | 4 5 6 | 7 8 9 ";
+        sb.append(colsHeader).append('\n');
+        sb.append("   ------+-------+------- ").append('\n');
+
+        for (int r = 0; r < SIZE; r++) {
+            char rowLabel = (char) ('A' + r);
+            sb.append(rowLabel).append("  ");
+
+            for (int c = 0; c < SIZE; c++) {
+                int val = board[r][c];
+                String cell = (val == 0) ? "_" : String.valueOf(val);
+                sb.append(cell).append(" ");
+                if (c % 3 == 2 && c < 8) sb.append("| ");
+            }
+
+            sb.append('\n');
+            if (r % 3 == 2 && r < 8) {
+                sb.append("   ------+-------+------- ").append('\n');
+            }
+        }
+
+        sb.append("\nEnter command (eg: A3 4, C5 clear, hint, check, quit, help): ");
+        printLine(sb.toString());
+    }
+
+    private void printLine(String s) {
+        System.out.println(s);
+    }
+
+    // Low-level mutation helpers (kept for gradual migration)
     public void set(int r, int c, int val) { board[r][c] = val; }
+
+    // Low-level mutation helpers (kept for gradual migration)
     public void clear(int r, int c) { board[r][c] = 0; }
+
     public boolean isPrefilled(int r, int c) { return prefilled[r][c]; }
+
     public void setPrefilled(int r, int c, boolean v) { prefilled[r][c] = v; }
+
+    /**
+     * Domain operation: place a value onto a non-prefilled cell.
+     *
+     * @return true if the move was applied; false otherwise.
+     */
+    public boolean placeValue(int r, int c, int val) {
+        if (r < 0 || r >= SIZE || c < 0 || c >= SIZE) {
+            return false;
+        }
+        if (isPrefilled(r, c)) {
+            return false;
+        }
+        if (val < 1 || val > 9) {
+            return false;
+        }
+        set(r, c, val);
+        return true;
+    }
+
+    /**
+     * Domain operation: apply a hint value onto a non-prefilled empty cell.
+     *
+     * @return true if the hint was applied; false otherwise.
+     */
+    public boolean applyHint(int r, int c, int val) {
+        // Hint is a special case of placing a value with the same invariants as user entry.
+        return placeValue(r, c, val);
+    }
+
+
+    /**
+     * Domain operation: clear a user-entered value from a cell.
+     *
+     * @return true if the cell was cleared; false otherwise.
+     */
+    public boolean clearCell(int r, int c) {
+        if (r < 0 || r >= SIZE || c < 0 || c >= SIZE) {
+            return false;
+        }
+        if (isPrefilled(r, c)) {
+            return false;
+        }
+        if (board[r][c] == 0) {
+            return false;
+        }
+        clear(r, c);
+        return true;
+    }
+
+    /**
+     * @return true if the puzzle is solved (complete and valid).
+     */
+    public boolean isSolved() {
+        return com.example.sudoku.utils.SudokuValidator.isCompleteAndValid(toArrayCopy());
+    }
+
+
 
     public List<int[]> getEmptyNonPrefilledCells() {
         List<int[]> empties = new ArrayList<>();
