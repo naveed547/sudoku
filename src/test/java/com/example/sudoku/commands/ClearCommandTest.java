@@ -73,5 +73,23 @@ public class ClearCommandTest {
         assertNotNull(result.message);
         assertTrue(result.message.contains("Invalid cell"));
     }
-}
 
+    @Test
+    void clearCommand_whenOutOfRangeRowOrCol_thenReturnsInvalidCellReference() {
+        // A0: invalid row/col => must not throw
+        ClearCommand cmd1 = new ClearCommand("A0");
+        CommandResult result1 = cmd1.execute(board);
+
+        assertTrue(result1.success);
+        assertNotNull(result1.message);
+        assertTrue(result1.message.contains("Invalid cell reference"));
+
+        // J1: invalid row letter => must not throw
+        ClearCommand cmd2 = new ClearCommand("J1");
+        CommandResult result2 = cmd2.execute(board);
+
+        assertTrue(result2.success);
+        assertNotNull(result2.message);
+        assertTrue(result2.message.contains("Invalid cell reference"));
+    }
+}

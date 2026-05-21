@@ -1,6 +1,7 @@
 package com.example.sudoku;
 
 import java.util.*;
+import com.example.sudoku.utils.SudokuValidator;
 
 /**
      * Board model
@@ -165,7 +166,7 @@ public class Board {
      * @return true if the puzzle is solved (complete and valid).
      */
     public boolean isSolved() {
-        return com.example.sudoku.utils.SudokuValidator.isCompleteAndValid(toArrayCopy());
+        return SudokuValidator.isCompleteAndValid(toArrayCopy());
     }
 
 
