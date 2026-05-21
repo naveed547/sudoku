@@ -78,6 +78,24 @@ public class PlaceCommandTest {
     }
 
     @Test
+    void placeCommand_whenOutOfRangeRowOrCol_thenReturnsInvalidCellReference() {
+        // A0: invalid row/col (0-index style) => must not throw
+        PlaceCommand cmd1 = new PlaceCommand("A0", "5");
+        CommandResult result1 = cmd1.execute(board);
+        assertTrue(result1.success);
+        assertNotNull(result1.message);
+        assertTrue(result1.message.contains("Invalid cell reference"));
+        assertEquals(0, board.get(0, 0));
+
+        // J1: invalid row letter => must not throw
+        PlaceCommand cmd2 = new PlaceCommand("J1", "5");
+        CommandResult result2 = cmd2.execute(board);
+        assertTrue(result2.success);
+        assertNotNull(result2.message);
+        assertTrue(result2.message.contains("Invalid cell reference"));
+    }
+
+    @Test
     void placeCommand_whenDuplicateMove_thenAcceptsButCheckWillReport() {
         board.set(0, 1, 5);
         PlaceCommand cmd = new PlaceCommand("A1", "5");

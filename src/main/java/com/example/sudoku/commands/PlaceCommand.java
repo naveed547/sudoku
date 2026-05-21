@@ -15,10 +15,15 @@ public class PlaceCommand implements Command {
     @Override
     public CommandResult execute(Board board) {
         int[] rc = SudokuValidator.parseCell(cell);
-        if (rc == null) {
+        if (rc == null || rc.length < 2) {
             return CommandResult.continueGame("\nInvalid cell reference.\n");
         }
+
         int r = rc[0], c = rc[1];
+        if (r < 0 || r >= Board.SIZE || c < 0 || c >= Board.SIZE) {
+            return CommandResult.continueGame("\nInvalid cell reference.\n");
+        }
+
         if (board.isPrefilled(r, c)) {
             return CommandResult.continueGame("\nCannot modify a prefilled cell.\n");
         }
