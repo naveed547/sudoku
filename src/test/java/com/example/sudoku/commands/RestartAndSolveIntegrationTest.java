@@ -1,92 +1,66 @@
 package com.example.sudoku.commands;
 
-import java.util.Random;
-
-import static org.junit.jupiter.api.Assertions.*;
-
+import com.example.sudoku.Board;
+import com.example.sudoku.GameService;
+import com.example.sudoku.utils.SudokuGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
-import com.example.sudoku.Board;
-import com.example.sudoku.utils.SudokuGenerator;
+import java.util.Random;
 
+/**
+ * Integration test to verify the interaction between Restart and Solve commands.
+ */
 public class RestartAndSolveIntegrationTest {
+
     private Board board;
-    private Random rand;
-    private int[][] solution;
+    private GameService gameService;
 
     @BeforeEach
     void setUp() {
-        rand = new Random(42);
-        board = new Board();
-
-        SudokuGenerator gen = new SudokuGenerator(rand);
-        solution = gen.generateFullSolution();
-        gen.createPuzzle(board, solution, 30);
-
-        // Ensure board knows the solution for commands like solve/hint.
-        board.setSolution(solution);
+        // Use a fixed seed for deterministic behavior during tests
+        gameService = new GameService(new SudokuGenerator(new Random(42)));
+        board = gameService.startNewGame();
     }
 
     @Test
-    void solve_thenRestart_clearsSolvedCells_andResetsHintCap() {
-        // Before solve: there should be at least one empty non-prefilled cell.
-        int beforeEmpties = board.getEmptyNonPrefilledCells().size();
-        assertTrue(beforeEmpties > 0, "Expected at least one empty non-prefilled cell before solve.");
+    void testRestartClearsUserMovesButPreservesPuzzle() {
+        // 1. Identify a cell that is not prefilled and place a value
+        int r = 0, c = 0;
+        while (board.isPrefilled(r, c)) {
+            c++;
+            if (c == 9) { c = 0; r++; }
+        }
 
-        int beforeHintsLeft = board.getHintCountLeft();
+        board.placeValue(r, c, 5);
+        assertEquals(5, board.get(r, c), "Value should be placed");
+        assertTrue(board.isPuzzleStarted(), "Puzzle should be marked as started");
 
-        // Solve the puzzle first.
-        SolveCommand solve = new SolveCommand();
-        CommandResult solveResult = solve.execute(board);
+        // 2. Execute Restart
+        Command restart = new RestartCommand();
+        restart.execute(board);
 
-        assertTrue(solveResult.success);
-        assertNotNull(solveResult.message);
-        assertTrue(solveResult.message.contains("Solved"));
-
-        // After solve: no empty non-prefilled cells should remain.
-        int afterSolveEmpties = board.getEmptyNonPrefilledCells().size();
-        assertEquals(0, afterSolveEmpties);
-
-        // Restart should reset the board to a new puzzle state (clears user entries).
-        RestartCommand restart = new RestartCommand();
-        CommandResult restartResult = restart.execute(board);
-
-        assertTrue(restartResult.success);
-        assertNotNull(restartResult.message);
-        assertTrue(restartResult.message.contains("Game restarted"));
-
-        int afterRestartEmpties = board.getEmptyNonPrefilledCells().size();
-        assertTrue(afterRestartEmpties > 0, "Expected empty cells again after restart.");
-
-        // Hint cap should reset to MAX_HINT_ALLOWED.
-        assertEquals(Board.MAX_HINT_ALLOWED, board.getHintCountLeft());
-
-        // Sanity: hint count should have changed after restart vs before solve (usually).
-        // Not strictly required, so only assert it's within the expected range.
-        assertTrue(beforeHintsLeft >= 0 && beforeHintsLeft <= Board.MAX_HINT_ALLOWED);
+        // 3. Verify state
+        assertEquals(0, board.get(r, c), "User move should be cleared after restart");
+        assertFalse(board.isPuzzleStarted(), "puzzleStarted flag should be reset");
+        assertEquals(Board.MAX_HINT_ALLOWED, board.getHintCountLeft(), "Hints should be reset");
     }
 
     @Test
-    void solve_allAtOnce_fillsFromSolution_evenIfBoardHintCountLeftChanged() {
-        // Consume a couple of hints to change hint counter (solve should not depend on hint counter).
-        board.consumeHint();
-        board.consumeHint();
-        assertEquals(Board.MAX_HINT_ALLOWED - 2, board.getHintCountLeft());
+    void testSolveAfterRestartProducesValidBoard() {
+        // 1. Restart to ensure clean state
+        new RestartCommand().execute(board);
 
-        SolveCommand solve = new SolveCommand();
-        CommandResult result = solve.execute(board);
+        // 2. Execute Solve
+        new SolveCommand().execute(board);
 
-        assertTrue(result.success);
-        assertNotNull(result.message);
-        assertTrue(result.message.contains("Solved"));
-
-        // Every non-prefilled cell should match stored solution.
-        for (int r = 0; r < Board.SIZE; r++) {
-            for (int c = 0; c < Board.SIZE; c++) {
-                if (!board.isPrefilled(r, c)) {
-                    assertEquals(solution[r][c], board.get(r, c));
-                }
+        // 3. Verify completion
+        assertTrue(board.isSolved(), "Board should be solved after SolveCommand");
+        int[][] solution = board.getSolution();
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                assertEquals(solution[i][j], board.get(i, j), "Board must match stored solution");
             }
         }
     }
