@@ -1,6 +1,8 @@
 package com.example.sudoku.commands;
 
 import com.example.sudoku.Board;
+import com.example.sudoku.GameService;
+import com.example.sudoku.utils.SudokuGenerator;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -8,9 +10,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class CommandFactoryTest {
 
     private final Board board = new Board();
+    private final GameService gameService = new GameService(new SudokuGenerator());
 
     private void assertParsesTo(String input, Class<? extends Command> expected) {
-        Command cmd = CommandFactory.parse(input, board);
+        Command cmd = CommandFactory.parse(input, board, gameService);
         assertNotNull(cmd);
         assertInstanceOf(expected, cmd);
     }
@@ -21,6 +24,9 @@ class CommandFactoryTest {
         assertParsesTo("hint", HintCommand.class);
         assertParsesTo("check", CheckCommand.class);
         assertParsesTo("help", HelpCommand.class);
+
+        assertParsesTo("restart", RestartCommand.class);
+        assertParsesTo("solve", SolveCommand.class);
     }
 
     @Test
@@ -57,6 +63,9 @@ class CommandFactoryTest {
         assertParsesTo("HINT", HintCommand.class);
         assertParsesTo("CHECK", CheckCommand.class);
         assertParsesTo("HELP", HelpCommand.class);
+
+        assertParsesTo("RESTART", RestartCommand.class);
+        assertParsesTo("SOLVE", SolveCommand.class);
     }
 
     @Test
@@ -79,19 +88,30 @@ class CommandFactoryTest {
     }
 
     @Test
-    void parse_nullOrEmpty_returnsUnknownCommand() {
-        assertInstanceOf(UnknownCommand.class, CommandFactory.parse(null, board));
-        assertInstanceOf(UnknownCommand.class, CommandFactory.parse("", board));
-        assertInstanceOf(UnknownCommand.class, CommandFactory.parse("   ", board));
+    void parse_nullOrEmpty_returnsRefreshCommand() {
+        assertInstanceOf(RefreshCommand.class, CommandFactory.parse(null, board, gameService));
+        assertInstanceOf(RefreshCommand.class, CommandFactory.parse("", board, gameService));
+        assertInstanceOf(RefreshCommand.class, CommandFactory.parse("   ", board, gameService));
     }
 
     @Test
     void performance_parse_manyInputs_noExceptions() {
         // Avoid strict timing thresholds to prevent flaky tests.
         for (int i = 0; i < 50_000; i++) {
-            CommandFactory.parse((i % 2 == 0 ? "hint" : "A1 5"), board);
-            CommandFactory.parse("clear A1", board);
-            CommandFactory.parse("unknown_command", board);
+            CommandFactory.parse((i % 2 == 0 ? "hint" : "A1 5"), board, gameService);
+            CommandFactory.parse("clear A1", board, gameService);
+            CommandFactory.parse("unknown_command", board, gameService);
         }
+    }
+
+    @Test
+    void parse_emptyInputOnSolvedBoard_returnsRefreshCommand() {
+        // Force board to solved state
+        int[][] sol = gameService.startNewGame().getSolution();
+        board.setSolution(sol);
+        board.copyFromSolution(sol);
+
+        Command cmd = CommandFactory.parse("", board, gameService);
+        assertInstanceOf(RefreshCommand.class, cmd);
     }
 }

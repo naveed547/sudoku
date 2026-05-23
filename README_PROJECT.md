@@ -20,7 +20,7 @@ This is a command-line Sudoku game written in Java. The architecture separates c
 | Layer | Purpose |
 |-------|---------|
 | `Board` | Stores grid state and prefilled flags (dumb data holder) |
-| `SudokuGenerator` | Generates valid puzzles via backtracking |
+| `SudokuGenerator` | Generates valid puzzles using a backtracking algorithm |
 | `SudokuValidator` | Static validation utilities (parsing, rule checking, solution counting) |
 | `CommandFactory` + `Command` implementations | Interprets user input into actions |
 | `BoardRenderer` | All terminal formatting/I/O |
@@ -36,63 +36,38 @@ This is a command-line Sudoku game written in Java. The architecture separates c
 ```java
 // Line 17: Static entry point — creates instance and starts the game
 public static void main(String[] args) {
-    new SudokuGame().start();
+    new SudokuGame().run();
 }
 ```
 
 ```java
 // Lines 21–60: Main game loop
 private void start() {
-    // Line 23: Create empty board
-    Board board = new Board();
+    // Line 23: Initialize Service and generate first puzzle
+    GameService gameService = new GameService(new SudokuGenerator());
+    Board board = gameService.startNewGame();
 
-    // Line 24: Create renderer for terminal output
-    BoardRenderer renderer = new BoardRenderer();
-
-    // Line 25: Wire up puzzle generator with fresh Random seed
-    GameService gameService = new GameService(new SudokuGenerator(new java.util.Random()));
-
-    // Line 26: Print welcome banner
-    renderer.printWelcome();
-
-    // Line 28: Generate first puzzle, store solution for hints/validation
-    int[][] solution = gameService.newPuzzle(board);
+    // Line 26: Print welcome banner using static utility
+    System.out.print(BoardRenderer.getWelcomeMessage());
 
     // Line 30: Scanner auto-closes at end of try block
     try (Scanner sc = new Scanner(System.in)) {
         while (true) {
-            // Line 32: Render current board state; puzzleStarted flag changes header text
-            renderer.render(board, board.isPuzzleStarted());
-
-            // Line 34: Check if puzzle is complete and valid
-            if (SudokuValidator.isCompleteAndValid(board.toArrayCopy())) {
-                // Line 35: Show success message
-                renderer.printCompletionSuccess();
-                // Line 36: Wait for Enter to start new puzzle
-                sc.nextLine();
-
-                // Lines 38–40: Reset everything for fresh puzzle
-                board = new Board();
-                gameService = new GameService(new SudokuGenerator(new java.util.Random()));
-                solution = gameService.newPuzzle(board);
-                continue;
-            }
+            // Line 32: Render current board state and prompt
+            System.out.print(BoardRenderer.renderToString(board));
+            System.out.print(BoardRenderer.getPrompt(board));
 
             // Line 44: Read player input
             String line = sc.nextLine().trim();
-            // Line 45–47: Skip empty lines
-            if (line.isEmpty()) {
-                continue;
-            }
 
             // Line 48: Allow comma as separator (e.g., "A3, 5" → "A3 5")
             line = line.replace(",", " ").trim();
 
             // Line 49: Parse input string into a Command object
-            Command cmd = CommandFactory.parse(line, board, solution, sc);
+            Command cmd = CommandFactory.parse(line, board, gameService);
 
             // Line 50: Execute command, get result
-            CommandResult result = cmd.execute(board, solution, sc);
+            CommandResult result = cmd.execute(board);
 
             // Lines 52–54: Print any message from command
             if (result != null && result.message != null) {
@@ -121,38 +96,41 @@ public static final int SIZE = 9;
 // Line 11: How many cells remain prefilled in generated puzzles (30 default)
 public static final int PREFILLED_COUNT = 30;
 
+// Line 12: Limit on user hints
+public static final int MAX_HINT_ALLOWED = 5;
+
 // Line 13: 2D array storing cell values (0 = empty)
 private final int[][] board = new int[SIZE][SIZE];
 
 // Line 14: Parallel array marking which cells are fixed/prefilled
 private final boolean[][] prefilled = new boolean[SIZE][SIZE];
 
+// Line 15: Stored solution for validation and hints
+private int[][] solution;
+
 // Line 16: Tracks if player has made any move (changes header from "puzzle" to "grid")
 private boolean puzzleStarted = false;
 
 // Lines 19–21: Copy solution values into board (used during puzzle generation)
-public void copyFromSolution(int[][] solution) {
-    for (int i = 0; i < SIZE; i++) System.arraycopy(solution[i], 0, board[i], 0, SIZE);
-}
+public void copyFromSolution(int[][] solution) { ... }
 
 // Lines 27–34: Reset all state for new puzzle
-public void resetState() {
-    for (int r = 0; r < SIZE; r++) {
-        Arrays.fill(board[r], 0);
-        Arrays.fill(prefilled[r], false);
-    }
-    puzzleStarted = false;
-}
+public void resetState() { ... }
 
 // Lines 36–42: puzzleStarted getter/setter
 public boolean isPuzzleStarted() { return puzzleStarted; }
 public void setPuzzleStarted(boolean v) { this.puzzleStarted = v; }
 
 // Lines 44–48: Basic cell accessors
-public int get(int r, int c) { return board[r][c]; }
-public void set(int r, int c, int val) { board[r][c] = val; }
-public void clear(int r, int c) { board[r][c] = 0; }
+public int get(int r, int c) { ... }
+public boolean placeValue(int r, int c, int val) { ... }
+public boolean clearCell(int r, int c) { ... }
+public boolean applyHint(int r, int c, int val) { ... }
 public boolean isPrefilled(int r, int c) { return prefilled[r][c]; }
+public boolean isSolved() { ... }
+public int getHintCountLeft() { ... }
+public int[][] getSolution() { return solution; }
+public void setSolution(int[][] sol) { this.solution = sol; }
 public void setPrefilled(int r, int c, boolean v) { prefilled[r][c] = v; }
 
 // Lines 50–56: Return list of cells that are empty AND not prefilled (hint targets)
@@ -184,24 +162,20 @@ public void markPrefilledFromBoard() {
 ## BoardRenderer (UI)
 
 **File:** `src/main/java/com/example/sudoku/BoardRenderer.java`
+**Key Changes:** Methods are now static and return `String` for the game loop to print.
 
 ```java
-// Lines 5–7: Welcome banner (printed once at startup)
-public void printWelcome() {
-    printLine("Welcome to Sudoku! (Prefilled cells are fixed and cannot be changed)\n");
-}
+// Lines 9-11: Welcome banner string
+public static String getWelcomeMessage() { ... }
 
-// Lines 9–15: Success screen when puzzle is completed
-public void printCompletionSuccess() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("You have successfully completed the Sudoku puzzle!");
-    sb.append(System.lineSeparator());
-    sb.append("Press ENTER to play again...");
-    printLine(sb.toString());
-}
+// Lines 13-15: Success message string
+public static String getCompletionMessage() { ... }
 
-// Lines 22–50: Main board rendering
-public void render(Board board, boolean puzzleStarted) {
+// Lines 17-20: Dynamic prompt showing remaining hints
+public static String getPrompt(Board board) { ... }
+
+// Lines 22–50: Main board rendering as a string
+public static String renderToString(Board board) {
     StringBuilder sb = new StringBuilder();
 
     // Line 25: Different header depending on game state
@@ -225,23 +199,8 @@ public void render(Board board, boolean puzzleStarted) {
             // Line 38: Vertical box divider after columns 3 and 6
             if (c % 3 == 2 && c < 8) sb.append("| ");
         }
-
-        sb.append('\n');
-        // Line 42: Horizontal box divider after rows 3 and 6
-        if (r % 3 == 2 && r < 8) {
-            sb.append("   ------+-------+------- ").append('\n');
-        }
     }
-
-    // Lines 47–49: Command prompt
-    sb.append("\nEnter command (eg: A3 4, clear C5, hint, check, quit, help): ");
-    sb.append(System.lineSeparator());
-    printLine(sb.toString());
-}
-
-// Line 52–54: Single output method (allows easy mocking in tests)
-private void printLine(String s) {
-    System.out.println(s);
+    return sb.toString();
 }
 ```
 
@@ -259,11 +218,12 @@ public GameService(SudokuGenerator generator) {
 }
 
 // Lines 20–27: Generate new puzzle and return solution for later use
-public int[][] newPuzzle(Board board) {
-    board.resetState();                                          // Clear board
-    int[][] solution = generator.generateFullSolution();          // Create complete valid solution
-    generator.createPuzzle(board, solution, Board.PREFILLED_COUNT); // Remove cells to form puzzle
-    return solution; // Returned so hints/check commands can use it
+// Line 25: Prepare board with new puzzle data
+public void prepareNewPuzzle(Board board) {
+    board.resetState();
+    int[][] solution = generator.generateFullSolution();
+    generator.createPuzzle(board, solution, Board.PREFILLED_COUNT);
+    board.setSolution(solution);
 }
 ```
 
@@ -522,31 +482,32 @@ public class CommandResult {
 **File:** `src/main/java/com/example/sudoku/commands/CommandFactory.java`
 
 ```java
-// Single-word commands (no args): keyword -> constructor reference
-private static final Map<String, Supplier<Command>> SIMPLE_COMMANDS = Map.of(
-    "help", HelpCommand::new,
-    "quit", QuitCommand::new,
-    "hint", HintCommand::new,
-    "check", CheckCommand::new);
+// Line 18: Map-based registry for single-word commands
+private static final Map<String, Function<String[], Command>> SINGLE_WORD_COMMANDS = Map.of(
+        "quit", QuitCommand::parse,
+        "hint", HintCommand::parse,
+        "solve", SolveCommand::parse,
+        "restart", RestartCommand::parse,
+        ...
+);
 
-public static Command parse(String line, Board board) {
-    if (line == null || line.isBlank()) return new UnknownCommand();
+public static Command parse(String line, Board board, GameService gameService) {
+    // Line 31: Empty input triggers Refresh (or New Game if solved)
+    if (line == null || line.isBlank()) return new RefreshCommand(gameService);
 
     String[] tokens = line.trim().split("\\s+");
+    String firstToken = tokens[0].toLowerCase();
 
-    // ------------------------------------
-    // Single-word commands
-    // ------------------------------------
-    if (tokens.length == 1) {
-        Supplier<Command> supplier = SIMPLE_COMMANDS.get(tokens[0].toLowerCase());
-        return supplier != null ? supplier.get() : new UnknownCommand();
+    // Line 39: Check registry
+    if (tokens.length == 1 && SINGLE_WORD_COMMANDS.containsKey(firstToken)) {
+        return SINGLE_WORD_COMMANDS.get(firstToken).apply(tokens);
     }
 
-    // ------------------------------------
-    // Multi-token commands
-    //   - clear: Example "A1 clear"
-    //   - place: Example "A1 5"
-    // ------------------------------------
+    // Line 45: Block placement/clearing if puzzle is already solved
+    if (board != null && board.isSolved()) {
+        return b -> CommandResult.continueGame("\nPuzzle solved! Press ENTER...");
+    }
+
     if (ClearCommand.parse(tokens) != null) return ClearCommand.parse(tokens);
     if (PlaceCommand.parse(tokens) != null) return PlaceCommand.parse(tokens);
 

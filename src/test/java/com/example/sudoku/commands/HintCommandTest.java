@@ -36,7 +36,8 @@ public class HintCommandTest {
 
         assertTrue(result.success);
         assertNotNull(result.message);
-        assertTrue(result.message.contains("Hint: cell"));
+        assertTrue(result.message.contains("Hint (4 remaining): cell"));
+        assertTrue(result.message.contains("Current grid:"));
 
         int afterEmpties = board.getEmptyNonPrefilledCells().size();
         assertEquals(beforeEmpties - 1, afterEmpties);
@@ -81,5 +82,20 @@ public class HintCommandTest {
         }
         assertTrue(found, "No solution value placed from empties");
     }
-}
 
+    @Test
+    void hintCommand_onlyMax5HintsShouldBeAllowed() {
+        HintCommand cmd = new HintCommand();
+        CommandResult result = cmd.execute(board);
+
+        for(int i = 1; i <= 5; i++) {
+            result = cmd.execute(board);
+            assertTrue(result.success);
+            assertNotNull(result.message);
+        }
+
+        // after 5 hint, no more hints should be provided
+        result = cmd.execute(board);
+        assertTrue(result.message.contains("Max hints cap reached"));
+    }
+}

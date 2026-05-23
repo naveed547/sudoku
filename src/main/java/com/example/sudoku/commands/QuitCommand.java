@@ -12,4 +12,3 @@ public class QuitCommand implements Command {
         return (t.length == 1 && "quit".equals(t[0].toLowerCase())) ? new QuitCommand() : null;
     }
 }
-

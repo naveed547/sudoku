@@ -1,6 +1,7 @@
 package com.example.sudoku.commands;
 
 import com.example.sudoku.Board;
+import com.example.sudoku.BoardRenderer;
 import com.example.sudoku.utils.SudokuValidator;
 
 public class PlaceCommand implements Command {
@@ -16,41 +17,43 @@ public class PlaceCommand implements Command {
     public CommandResult execute(Board board) {
         int[] rc = SudokuValidator.parseCell(cell);
         if (rc == null || rc.length < 2) {
-            return CommandResult.continueGame("\nInvalid cell reference.\n");
+            return CommandResult.continueGame("\nInvalid cell reference.\n" + BoardRenderer.renderToString(board) + BoardRenderer.getPrompt(board));
         }
 
         int r = rc[0], c = rc[1];
         if (r < 0 || r >= Board.SIZE || c < 0 || c >= Board.SIZE) {
-            return CommandResult.continueGame("\nInvalid cell reference.\n");
+            return CommandResult.continueGame("\nInvalid cell reference.\n" + BoardRenderer.renderToString(board) + BoardRenderer.getPrompt(board));
         }
 
         if (board.isPrefilled(r, c)) {
-            return CommandResult.continueGame("\nCannot modify a prefilled cell.\n");
+            return CommandResult.continueGame("\nCannot modify a prefilled cell.\n" + BoardRenderer.renderToString(board) + BoardRenderer.getPrompt(board));
         }
 
         int val;
         try {
             val = Integer.parseInt(valueToken);
         } catch (NumberFormatException e) {
-            return CommandResult.continueGame("\nSecond token must be a number 1-9.\n");
+            return CommandResult.continueGame("\nSecond token must be a number 1-9.\n" + BoardRenderer.renderToString(board) + BoardRenderer.getPrompt(board));
         }
 
         if (val < 1 || val > 9) {
-            return CommandResult.continueGame("\nNumber must be between 1 and 9.\n");
+            return CommandResult.continueGame("\nNumber must be between 1 and 9.\n" + BoardRenderer.renderToString(board) + BoardRenderer.getPrompt(board));
         }
 
-        // Accept the move even if it creates a rule violation.
-        // The player will learn/see violations when they run `check`.
-        boolean ok = board.placeValue(r, c, val);
-        if (!ok) {
-            return CommandResult.continueGame("\nCannot place value on that cell.\n");
+        if (!board.placeValue(r, c, val)) {
+            return CommandResult.continueGame("\nCannot place value on that cell.\n" + BoardRenderer.renderToString(board) + BoardRenderer.getPrompt(board));
         }
 
-        return CommandResult.continueGame("\nPlaced " + val + " at " + cell.toUpperCase() + "\n");
+        String resultMsg = String.format("\nPlaced %d at %s\n%s", val, cell.toUpperCase(), BoardRenderer.renderToString(board));
+
+        if (board.isSolved()) {
+            return CommandResult.continueGame(resultMsg + BoardRenderer.getCompletionMessage());
+        }
+
+        return CommandResult.continueGame(resultMsg + BoardRenderer.getPrompt(board));
     }
 
     public static Command parse(String[] t) {
         return (t.length == 2 && t[1].matches("\\d+")) ? new PlaceCommand(t[0], t[1]) : null;
     }
 }
-

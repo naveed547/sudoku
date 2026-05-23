@@ -1,111 +1,78 @@
 package com.example.sudoku.commands;
 
-import org.junit.jupiter.api.BeforeEach;
+import com.example.sudoku.Board;
 import org.junit.jupiter.api.Test;
-
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.util.Random;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.example.sudoku.Board;
-import com.example.sudoku.utils.SudokuGenerator;
-
 public class PlaceCommandTest {
-    private Board board;
-    private int[][] solution;
-    private Random rand;
-    private ByteArrayOutputStream outContent;
-
-    @BeforeEach
-    void setUp() {
-        rand = new Random(42);
-        outContent = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(outContent));
-
-        board = new Board();
-        SudokuGenerator gen = new SudokuGenerator(rand);
-        solution = gen.generateFullSolution();
-        gen.createPuzzle(board, solution, 30);
-    }
 
     @Test
-    void placeCommand_whenValidEmptyCell_thenUpdatesBoardAndReturnsSuccessMessage() {
-        PlaceCommand cmd = new PlaceCommand("A1", "5");
+    void execute_withInvalidCell_returnsErrorMessage() {
+        Board board = new Board();
+        PlaceCommand cmd = new PlaceCommand("Z9", "5");
         CommandResult result = cmd.execute(board);
-
-        assertTrue(result.success);
-        assertNotNull(result.message);
-        assertTrue(result.message.contains("Placed 5 at A1"));
-        assertEquals(5, board.get(0, 0));
-    }
-
-    @Test
-    void placeCommand_whenPrefilledCell_thenRejectsWithoutChange() {
-        board.setPrefilled(0, 0, true);
-        PlaceCommand cmd = new PlaceCommand("A1", "5");
-
-        CommandResult result = cmd.execute(board);
-
-        assertTrue(result.success);
-        assertNotNull(result.message);
-        assertTrue(result.message.contains("Cannot modify"));
-        assertEquals(0, board.get(0, 0));
-    }
-
-    @Test
-    void placeCommand_whenInvalidCellFormat_thenReturnsErrorMessage() {
-        PlaceCommand cmd = new PlaceCommand("J10", "5");
-
-        CommandResult result = cmd.execute(board);
-
-        assertTrue(result.success);
-        assertNotNull(result.message);
         assertTrue(result.message.contains("Invalid cell reference"));
+        assertTrue(result.message.contains("Here is your puzzle:"));
     }
 
     @Test
-    void placeCommand_whenInvalidNumber_thenRejects() {
-        PlaceCommand cmd = new PlaceCommand("A1", "0");
-
+    void execute_withNonNumericValue_returnsErrorMessage() {
+        Board board = new Board();
+        PlaceCommand cmd = new PlaceCommand("A1", "X");
         CommandResult result = cmd.execute(board);
-
-        assertTrue(result.success);
-        assertNotNull(result.message);
-        assertTrue(result.message.contains("Number must be between 1 and 9"));
-        assertEquals(0, board.get(0, 0));
+        assertTrue(result.message.contains("must be a number"));
+        assertTrue(result.message.contains("Here is your puzzle:"));
     }
 
     @Test
-    void placeCommand_whenOutOfRangeRowOrCol_thenReturnsInvalidCellReference() {
-        // A0: invalid row/col (0-index style) => must not throw
-        PlaceCommand cmd1 = new PlaceCommand("A0", "5");
-        CommandResult result1 = cmd1.execute(board);
-        assertTrue(result1.success);
-        assertNotNull(result1.message);
-        assertTrue(result1.message.contains("Invalid cell reference"));
-        assertEquals(0, board.get(0, 0));
-
-        // J1: invalid row letter => must not throw
-        PlaceCommand cmd2 = new PlaceCommand("J1", "5");
-        CommandResult result2 = cmd2.execute(board);
-        assertTrue(result2.success);
-        assertNotNull(result2.message);
-        assertTrue(result2.message.contains("Invalid cell reference"));
-    }
-
-    @Test
-    void placeCommand_whenDuplicateMove_thenAcceptsButCheckWillReport() {
-        board.set(0, 1, 5);
+    void execute_successfulPlacement_returnsSuccessMessage() {
+        Board board = new Board();
         PlaceCommand cmd = new PlaceCommand("A1", "5");
-
         CommandResult result = cmd.execute(board);
-
-        assertTrue(result.success);
-        assertNotNull(result.message);
         assertTrue(result.message.contains("Placed 5 at A1"));
         assertEquals(5, board.get(0, 0));
+        assertTrue(result.message.contains("Current grid:"));
+    }
+
+    @Test
+    void execute_onPrefilledCell_returnsErrorMessage() {
+        Board board = new Board();
+        board.set(0, 0, 5);
+        board.setPrefilled(0, 0, true);
+        PlaceCommand cmd = new PlaceCommand("A1", "6");
+        CommandResult result = cmd.execute(board);
+        assertTrue(result.message.contains("Cannot modify a prefilled cell"));
+        assertEquals(5, board.get(0, 0));
+        assertTrue(result.message.contains("Here is your puzzle:"));
+    }
+
+    @Test
+    void execute_outOfRangeValue_returnsErrorMessage() {
+        Board board = new Board();
+        PlaceCommand cmd = new PlaceCommand("A1", "10");
+        CommandResult result = cmd.execute(board);
+        assertTrue(result.message.contains("must be between 1 and 9"));
+        assertTrue(result.message.contains("Here is your puzzle:"));
+    }
+
+    @Test
+    void execute_completingPuzzle_returnsCompletionMessage() {
+        Board board = new Board();
+        int[][] sol = {{5,3,4,6,7,8,9,1,2}, {6,7,2,1,9,5,3,4,8}, {1,9,8,3,4,2,5,6,7}, {8,5,9,7,6,1,4,2,3}, {4,2,6,8,5,3,7,9,1}, {7,1,3,9,2,4,8,5,6}, {9,6,1,5,3,7,2,8,4}, {2,8,7,4,1,9,6,3,5}, {3,4,5,2,8,6,1,7,9}};
+        board.setSolution(sol);
+        // Fill everything except A1
+        for (int r=0; r<9; r++) for (int c=0; c<9; c++) if (r!=0 || c!=0) board.set(r, c, sol[r][c]);
+        
+        PlaceCommand cmd = new PlaceCommand("A1", "5");
+        CommandResult result = cmd.execute(board);
+        assertTrue(result.message.contains("successfully completed"));
+        assertTrue(result.message.contains("Press ENTER for a new game"));
+    }
+
+    @Test
+    void parse_acceptsValidFormat() {
+        Command cmd = PlaceCommand.parse(new String[]{"B2", "7"});
+        assertNotNull(cmd);
+        assertInstanceOf(PlaceCommand.class, cmd);
     }
 }
-

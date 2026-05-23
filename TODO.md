@@ -1,3 +1,4 @@
-- [ ] Refactor `CommandFactory` to use single-word command map for: help, quit, hint, check
-- [ ] Keep multi-token parsing delegating to `ClearCommand::parse` and `PlaceCommand::parse` (preserve existing regex/edge cases)
-- [ ] Run `mvn test` to verify `CommandFactoryTest` and the full suite
+- [x] Refactor `CommandFactory` to use single-word command map for: help, quit, hint, check
+- [x] Keep multi-token parsing delegating to `ClearCommand::parse` and `PlaceCommand::parse` (preserve existing regex/edge cases)
+- [x] Run `mvn test` to verify `CommandFactoryTest` and the full suite
+- [x] Cleanup documentation and line references in README_PROJECT.md

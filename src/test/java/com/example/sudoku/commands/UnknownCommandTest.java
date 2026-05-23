@@ -17,6 +17,7 @@ public class UnknownCommandTest {
         assertTrue(result.success);
         assertNotNull(result.message);
         assertTrue(result.message.contains("Unknown") || result.message.contains("Invalid"));
+        assertTrue(result.message.contains("Here is your puzzle:"));
     }
 
     @Test
@@ -38,4 +39,3 @@ public class UnknownCommandTest {
         assertTrue(result.success);
     }
 }
-

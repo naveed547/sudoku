@@ -20,37 +20,24 @@ public class SudokuGame {
         SudokuGenerator generator = new SudokuGenerator();
         GameService gameService = new GameService(generator);
         Board board = gameService.startNewGame();
-        board.printWelcome();
+        System.out.print(BoardRenderer.getWelcomeMessage());
+        System.out.print(BoardRenderer.renderToString(board) + BoardRenderer.getPrompt(board));
 
         try (Scanner sc = new Scanner(System.in)) {
-            while (true) {
-                if (board.isSolved()) {
-                    board.printCompletionSuccess();
-                    sc.nextLine();
-                    board = gameService.startNewGame();
-                    board.printWelcome();
-                    continue;
-                }
+            while (sc.hasNextLine()) {
+                try {
+                    String line = sc.nextLine().trim();
+                    line = line.replace(",", " ").trim();
+                    Command cmd = CommandFactory.parse(line, board, gameService);
+                    CommandResult result = cmd.execute(board);
 
-                board.render(board.isPuzzleStarted());
-
-                String line = sc.nextLine().trim();
-                if (line.isEmpty()) {
-                    continue;
-                }
-                line = line.replace(",", " ").trim();
-                Command cmd = CommandFactory.parse(line, board);
-                CommandResult result = cmd.execute(board);
-
-                if (result != null && result.message != null) {
-                    System.out.print(result.message);
-                }
-                if (result != null && !result.success) {
-                    break;
-                }
-                // First user action marks the puzzle as "in progress"
-                if (!board.isPuzzleStarted()) {
-                    board.setPuzzleStarted(true);
+                    if (result != null) {
+                        System.out.print(result.message);
+                        if (!result.success) break;
+                    }
+                } catch (Exception e) {
+                    System.out.println("\nAn unexpected error occurred: " + e.getMessage());
+                    System.out.print(BoardRenderer.getPrompt(board));
                 }
             }
         }

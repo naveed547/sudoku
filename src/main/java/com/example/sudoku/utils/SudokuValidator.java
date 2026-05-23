@@ -3,13 +3,8 @@ package com.example.sudoku.utils;
 import java.util.*;
 import com.example.sudoku.Board;
 
-
-/**
- * Utility functions for Sudoku logic: validation, move checks, parsing.
- * Kept stateless and static so tests can call them directly.
- */
 public class SudokuValidator {
-    // Parse cell string like "A3" or "a3" -> {row,col} or return null if invalid
+
     public static int[] parseCell(String s) {
         if (s == null) return null;
         s = s.trim().toUpperCase();
@@ -27,96 +22,75 @@ public class SudokuValidator {
         }
     }
 
-    // Check whether placing val at r,c on given board would create duplicates
     public static boolean isValidMove(int[][] board, int r, int c, int val) {
-        for (int j = 0; j < Board.SIZE; j++) if (board[r][j] == val && j != c) return false;
-        for (int i = 0; i < Board.SIZE; i++) if (board[i][c] == val && i != r) return false;
+        // Check Row and Column
+        for (int i = 0; i < Board.SIZE; i++) {
+            if (board[r][i] == val && i != c) return false;
+            if (board[i][c] == val && i != r) return false;
+        }
+        // Check 3x3 Box
         int br = (r / 3) * 3, bc = (c / 3) * 3;
-        for (int i = br; i < br + 3; i++)
-            for (int j = bc; j < bc + 3; j++)
+        for (int i = br; i < br + 3; i++) {
+            for (int j = bc; j < bc + 3; j++) {
                 if (board[i][j] == val && (i != r || j != c)) return false;
+            }
+        }
         return true;
     }
 
-    // Validate the whole board and return a list of human readable problems found.
-    public static List<String> validateWholeBoard(int[][] board) {
-        List<String> problems = new ArrayList<>();
-        // rows
+    public static ValidationResult validateWholeBoard(int[][] board) {
+        var errors = new ArrayList<ValidationResult.ValidationError>();
+        
         for (int r = 0; r < Board.SIZE; r++) {
-            boolean[] seen = new boolean[Board.SIZE + 1];
+            boolean[] seenR = new boolean[10], seenC = new boolean[10];
             for (int c = 0; c < Board.SIZE; c++) {
-                int val = board[r][c];
-                if (val == 0) continue;
-                if (seen[val]) problems.add("Duplicate " + val + " in row " + (char) ('A' + r));
-                seen[val] = true;
+                if (board[r][c] != 0 && seenR[board[r][c]]) 
+                    errors.add(new ValidationResult.ValidationError(ValidationResult.ErrorType.ROW, board[r][c], r, -1));
+                if (board[c][r] != 0 && seenC[board[c][r]]) 
+                    errors.add(new ValidationResult.ValidationError(ValidationResult.ErrorType.COLUMN, board[c][r], -1, r));
+                
+                if (board[r][c] != 0) seenR[board[r][c]] = true;
+                if (board[c][r] != 0) seenC[board[c][r]] = true;
             }
         }
-        // cols
-        for (int c = 0; c < Board.SIZE; c++) {
-            boolean[] seen = new boolean[Board.SIZE + 1];
-            for (int r = 0; r < Board.SIZE; r++) {
-                int val = board[r][c];
-                if (val == 0) continue;
-                if (seen[val]) problems.add("Duplicate " + val + " in column " + (c + 1));
-                seen[val] = true;
-            }
-        }
-        // boxes
+
         for (int br = 0; br < Board.SIZE; br += 3)
             for (int bc = 0; bc < Board.SIZE; bc += 3) {
-                boolean[] seen = new boolean[Board.SIZE + 1];
+                boolean[] seen = new boolean[10];
                 for (int r = br; r < br + 3; r++)
                     for (int c = bc; c < bc + 3; c++) {
                         int val = board[r][c];
-                        if (val == 0) continue;
-                        if (seen[val]) problems.add("Duplicate " + val + " in 3x3 box starting at " + (char) ('A' + br) + (bc + 1));
-                        seen[val] = true;
+                        if (val != 0) {
+                            if (seen[val]) errors.add(new ValidationResult.ValidationError(ValidationResult.ErrorType.BOX, val, br, bc));
+                            seen[val] = true;
+                        }
                     }
             }
-        return problems;
+        return new ValidationResult(errors);
     }
 
     public static boolean isCompleteAndValid(int[][] board) {
-        for (int r = 0; r < Board.SIZE; r++)
-            for (int c = 0; c < Board.SIZE; c++)
-                if (board[r][c] == 0) return false;
-        return !hasProblems(board);
+        return Arrays.stream(board).flatMapToInt(Arrays::stream).noneMatch(v -> v == 0) && !hasProblems(board);
     }
 
-    // Returns as soon as the first problem is found — caller only needs yes/no.
     private static boolean hasProblems(int[][] board) {
-        // rows
         for (int r = 0; r < Board.SIZE; r++) {
-            boolean[] seen = new boolean[Board.SIZE + 1];
-            for (int c = 0; c < Board.SIZE; c++) {
-                int val = board[r][c];
-                if (val == 0) continue;
-                if (seen[val]) return true;
-                seen[val] = true;
-            }
+            if (hasDuplicate(board, r, true)) return true;
+            if (hasDuplicate(board, r, false)) return true;
         }
-        // cols
-        for (int c = 0; c < Board.SIZE; c++) {
-            boolean[] seen = new boolean[Board.SIZE + 1];
-            for (int r = 0; r < Board.SIZE; r++) {
-                int val = board[r][c];
-                if (val == 0) continue;
-                if (seen[val]) return true;
-                seen[val] = true;
-            }
-        }
-        // boxes
         for (int br = 0; br < Board.SIZE; br += 3)
-            for (int bc = 0; bc < Board.SIZE; bc += 3) {
-                boolean[] seen = new boolean[Board.SIZE + 1];
-                for (int r = br; r < br + 3; r++)
-                    for (int c = bc; c < bc + 3; c++) {
-                        int val = board[r][c];
-                        if (val == 0) continue;
-                        if (seen[val]) return true;
-                        seen[val] = true;
-                    }
-            }
+            for (int bc = 0; bc < Board.SIZE; bc += 3)
+                if (hasBoxDuplicate(board, br, bc)) return true;
+        return false;
+    }
+
+    private static boolean hasDuplicate(int[][] board, int index, boolean isRow) {
+        boolean[] seen = new boolean[10];
+        for (int i = 0; i < Board.SIZE; i++) {
+            int val = isRow ? board[index][i] : board[i][index];
+            if (val != 0 && seen[val]) return true;
+            if (val != 0) seen[val] = true;
+        }
         return false;
     }
 
@@ -128,69 +102,61 @@ public class SudokuValidator {
      * @param limit maximum number of solutions to search for (for early stopping)
      */
     public static int countSolutions(int[][] board, int limit) {
-        int[][] working = new int[Board.SIZE][Board.SIZE];
-        for (int r = 0; r < Board.SIZE; r++) {
-            System.arraycopy(board[r], 0, working[r], 0, Board.SIZE);
-        }
+        int[][] working = Arrays.stream(board).map(int[]::clone).toArray(int[][]::new);
         return countSolutionsBacktrack(working, limit);
     }
 
     private static int countSolutionsBacktrack(int[][] board, int limit) {
         int[] next = findBestCell(board);
-        if (next == null) {
-            // complete grid; use hasProblems for fast yes/no
-            return hasProblems(board) ? 0 : 1;
-        }
+        if (next == null) return hasProblems(board) ? 0 : 1;
 
         int r = next[0], c = next[1];
-
         int count = 0;
         for (int val = 1; val <= Board.SIZE; val++) {
-            if (!isValidMove(board, r, c, val)) continue;
-            board[r][c] = val;
-            count += countSolutionsBacktrack(board, limit);
-            board[r][c] = 0;
-
-            if (count >= limit) return count;
+            if (isValidMove(board, r, c, val)) {
+                board[r][c] = val;
+                count += countSolutionsBacktrack(board, limit);
+                board[r][c] = 0;
+                if (count >= limit) return count;
+            }
         }
         return count;
     }
 
     private static int[] findBestCell(int[][] board) {
-
         int minCandidates = Integer.MAX_VALUE;
         int[] bestCell = null;
     
         for (int r = 0; r < Board.SIZE; r++) {
             for (int c = 0; c < Board.SIZE; c++) {
-    
-                if (board[r][c] != 0) {
-                    continue;
-                }
+                if (board[r][c] != 0) continue;
     
                 int candidates = countCandidates(board, r, c);
-    
                 if (candidates < minCandidates) {
-                    minCandidates = candidates;
-                    bestCell = new int[]{r, c};
+                    minCandidates = candidates; bestCell = new int[]{r, c};
                 }
             }
         }
-    
         return bestCell;
     }
 
     private static int countCandidates(int[][] board, int row, int col) {
-
         int count = 0;
-    
         for (int num = 1; num <= 9; num++) {
-            if (isValidMove(board, row, col, num)) {
-                count++;
-            }
+            if (isValidMove(board, row, col, num)) count++;
         }
-    
         return count;
     }
-}
 
+    private static boolean hasBoxDuplicate(int[][] board, int br, int bc) {
+        boolean[] seen = new boolean[10];
+        for (int r = br; r < br + 3; r++) {
+            for (int c = bc; c < bc + 3; c++) {
+                int val = board[r][c];
+                if (val != 0 && seen[val]) return true;
+                if (val != 0) seen[val] = true;
+            }
+        }
+        return false;
+    }
+}

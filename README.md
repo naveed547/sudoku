@@ -1,93 +1,43 @@
 # Sudoku CLI (Java + Maven)
 
-Interactive 9x9 Sudoku game played in the terminal.
+A standard 9x9 Sudoku game built for the command line.
 
 ## How it works
-- The game generates a full valid solution and then removes cells to create a puzzle.
-- Prefilled cells are **fixed**.
-- User moves are **accepted** (including moves that create duplicates).
-- Rule violations (row/column/3x3 box duplicates, and incomplete/invalid board) are reported when you run **`check`**.
-
+- Generates valid Sudoku grids and creates puzzles with 30 fixed prefilled cells.
+- Ensures every generated puzzle has a unique solution using a backtracking solver with MRV heuristics.
+- Supports manual entry (e.g., `A3 5` or `A3, 5`), hints, and automated solving.
+- Uses ANSI escape sequences to provide a clean, "refreshing" terminal interface.
 
 ## Prerequisites
-- Java 11+
-- Maven 3+
+- Java 11 or higher
+- Maven 3.6+
 
-## Standard build / test / run
-All commands use Maven (company standard):
-
-### Test
-```bash
-mvn test
-```
-
-### Build (fat/shaded jar)
-```bash
-mvn clean package -DskipTests=true
-```
-
-### Run
-```bash
-java -jar target/sudoku-1.0.0-shaded.jar
-```
-
+## Getting Started
+Run `mvn clean package` to build the executable jar, then launch it:
+`java -jar target/sudoku-1.0.0-shaded.jar`
 
 ## Commands
-```text
-A3 5       Place value 5 at cell A3 (unless the cell is prefilled)
-A3 clear   Clear cell A3 (only if non-prefilled)
-hint       Fill one empty non-prefilled cell with its solution value
-check      Scan the current grid and report rule violations
-help       Print command help
-quit       Exit the game
-```
-
-
-## Example
-```text
-Enter command (eg: A3 4, C5 clear, hint, check, quit):
-```
-
-## Notes on performance / determinism
-- `SudokuGenerator` generates solutions using backtracking.
-- The CLI has small allocation optimizations (example: `hint` reuses a single `Random`).
-- The generator/puzzle creation strategy stays deterministic for the same input seed, so unit tests expecting specific puzzle states continue to pass.
-
-## Tests
-Run all unit tests:
-```bash
-mvn test
-```
+| Command | Action |
+| :--- | :--- |
+| `A3 5` | Set value 5 at cell A3 (Commas allowed: `A3, 5`) |
+| `A3 clear` | Clear user-entered value at A3 |
+| `hint` | Provide a valid number for a random empty cell (Max 5) |
+| `check` | List rule violations (duplicates) in the current grid |
+| `restart` | Revert the board to the original puzzle state and reset hints |
+| `solve` | Automatically fill the board with the correct solution |
+| `help` | Show command list |
+| `[ENTER]` | Refresh display (or start a new game if the current one is solved) |
+| `quit` | Exit game |
 
 ## Project layout
 ```text
-src/main/java/com/example/sudoku/
-  Board.java
-  GameService.java
-  SudokuGame.java
-  BoardRenderer.java
-  commands/
-    CheckCommand.java
-    ClearCommand.java
-    Command.java
-    CommandFactory.java
-    CommandResult.java
-    HelpCommand.java
-    HintCommand.java
-    PlaceCommand.java
-    QuitCommand.java
-    UnknownCommand.java
-  utils/
-    SudokuGenerator.java
-    SudokuValidator.java
-
-src/test/java/com/example/sudoku/
-  BoardTest.java
-  BoardRendererTest.java
-  commands/*Test.java
-  utils/*Test.java
+├── Board.java         # Board model and state
+├── GameService.java   # Puzzle lifecycle management
+├── SudokuGame.java    # Main entry point and game loop
+├── BoardRenderer.java # CLI output logic
+├── commands/          # Command pattern implementations
+└── utils/             # Grid generation and validation logic
 ```
 
 ## License
-MIT (see `LICENSE`).
-
+MIT

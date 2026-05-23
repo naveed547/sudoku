@@ -14,4 +14,3 @@ public interface Command {
         Command parse(String[] tokens);
     }
 }
-

@@ -18,8 +18,10 @@ public class HelpCommandTest {
         assertTrue(result.message.contains("Commands:"));
         assertTrue(result.message.contains("A3 5"));
         assertTrue(result.message.contains("A3 clear"));
-        assertTrue(result.message.contains("hint"));
+        assertTrue(result.message.contains("hint     - Show random hint (Max 5)"));
         assertTrue(result.message.contains("check"));
+        assertTrue(result.message.contains("restart"));
+        assertTrue(result.message.contains("solve"));
         assertTrue(result.message.contains("quit"));
         assertTrue(result.message.contains("help"));
     }
@@ -34,4 +36,3 @@ public class HelpCommandTest {
         assertTrue(result.success);
     }
 }
-

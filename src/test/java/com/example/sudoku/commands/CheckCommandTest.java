@@ -39,6 +39,7 @@ public class CheckCommandTest {
         assertNotNull(result.message);
         assertTrue(result.message.contains("No rule violations detected."));
         assertFalse(result.message.contains("Problems found:"));
+        assertTrue(result.message.contains("Here is your puzzle:"));
     }
 
     @Test

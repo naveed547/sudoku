@@ -20,11 +20,14 @@ public class GameService {
      */
     public Board startNewGame() {
         Board board = new Board();
-        board.resetState();
+        prepareNewPuzzle(board);
+        return board;
+    }
 
+    public void prepareNewPuzzle(Board board) {
+        board.resetState();
         int[][] solution = generator.generateFullSolution();
         generator.createPuzzle(board, solution, Board.PREFILLED_COUNT);
         board.setSolution(solution);
-        return board;
     }
 }

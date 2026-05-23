@@ -82,13 +82,21 @@ public class SudokuValidatorTest {
     }
 
     @Test
+    void isValidMove_returnsTrue_whenValueMatchesCurrentCellContent() {
+        int[][] b = new int[Board.SIZE][Board.SIZE];
+        b[2][2] = 5;
+        assertTrue(SudokuValidator.isValidMove(b, 2, 2, 5), "Checking the current cell's value should be valid");
+    }
+
+    @Test
     void validateWholeBoard_reportsBoxDuplicates() {
         int[][] b = new int[Board.SIZE][Board.SIZE];
         // top-left 3x3 box (rows 0..2, cols 0..2)
         b[0][0] = 9;
         b[1][1] = 9; // box duplicate
 
-        List<String> problems = SudokuValidator.validateWholeBoard(b);
+        ValidationResult res = SudokuValidator.validateWholeBoard(b);
+        List<String> problems = res.getProblems();
         String joined = String.join("\n", problems).toLowerCase();
         assertTrue(joined.contains("box"), "Expected a box-duplicate problem");
     }
@@ -101,7 +109,8 @@ public class SudokuValidatorTest {
         b[1][0] = 2;
         b[2][0] = 2; // column duplicate
 
-        List<String> problems = SudokuValidator.validateWholeBoard(b);
+        ValidationResult res = SudokuValidator.validateWholeBoard(b);
+        List<String> problems = res.getProblems();
         assertTrue(problems.size() >= 2);
         String joined = String.join("\n", problems).toLowerCase();
         assertTrue(joined.contains("row"));
@@ -165,8 +174,8 @@ public class SudokuValidatorTest {
         // Make the board invalid: duplicate value within a row.
         solution[0][1] = solution[0][0];
 
-        List<String> problems = SudokuValidator.validateWholeBoard(solution);
-        assertFalse(problems.isEmpty(), "Expected problems for a conflicting filled board");
+        ValidationResult res = SudokuValidator.validateWholeBoard(solution);
+        assertFalse(res.isValid(), "Expected problems for a conflicting filled board");
         assertEquals(0, SudokuValidator.countSolutions(solution, 2));
     }
 
@@ -216,7 +225,8 @@ public class SudokuValidatorTest {
         b[0][0] = 4;
         b[1][0] = 4;
 
-        List<String> problems = SudokuValidator.validateWholeBoard(b);
+        ValidationResult res = SudokuValidator.validateWholeBoard(b);
+        List<String> problems = res.getProblems();
         assertFalse(problems.isEmpty(), "Expected problems for a conflicting filled board");
         String joined = String.join("\n", problems).toLowerCase();
         assertTrue(joined.contains("column"), "Expected a column-duplicate problem");
@@ -229,7 +239,8 @@ public class SudokuValidatorTest {
         b[0][0] = 7;
         b[2][2] = 7;
 
-        List<String> problems = SudokuValidator.validateWholeBoard(b);
+        ValidationResult res = SudokuValidator.validateWholeBoard(b);
+        List<String> problems = res.getProblems();
         assertFalse(problems.isEmpty(), "Expected problems for a conflicting filled board");
         String joined = String.join("\n", problems).toLowerCase();
         assertTrue(joined.contains("box"), "Expected a box-duplicate problem");
@@ -242,7 +253,7 @@ public class SudokuValidatorTest {
 
         assertTrue(SudokuValidator.isCompleteAndValid(solution), "Solved solution must be complete and valid");
         assertEquals(1, SudokuValidator.countSolutions(solution, 2), "Solved board must have exactly 1 solution");
-        assertTrue(SudokuValidator.validateWholeBoard(solution).isEmpty(), "Solved board must have no validation problems");
+        assertTrue(SudokuValidator.validateWholeBoard(solution).isValid(), "Solved board must have no validation problems");
     }
 
     @Test
@@ -273,4 +284,3 @@ public class SudokuValidatorTest {
         }
     }
 }
-

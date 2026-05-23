@@ -74,10 +74,6 @@ public class SudokuGenerator {
 
         int removed = 0;
 
-        // Reuse a single candidate buffer to avoid per-iteration allocations.
-        // SudokuUtils.countSolutions will copy internally, so correctness is unchanged.
-        int[][] candidate = new int[Board.SIZE][Board.SIZE];
-
         for (int[] cell : allCells) {
             if (removed >= toRemove)
                 break;
@@ -90,14 +86,8 @@ public class SudokuGenerator {
             // Try removing
             board.clear(r, c);
 
-            // Uniqueness check (early stop after 2 solutions)
-            // Copy current board state into the reusable candidate buffer.
-            int[][] snapshot = board.toArrayCopy();
-            for (int rr = 0; rr < Board.SIZE; rr++) {
-                System.arraycopy(snapshot[rr], 0, candidate[rr], 0, Board.SIZE);
-            }
-
-            int solutions = SudokuValidator.countSolutions(candidate, 2);
+            // Uniqueness check: SudokuValidator.countSolutions makes its own working copy.
+            int solutions = SudokuValidator.countSolutions(board.toArrayCopy(), 2);
 
             if (solutions != 1) {
                 // Revert removal

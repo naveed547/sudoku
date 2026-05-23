@@ -1,0 +1,15 @@
+# <type>(<scope>): <subject>
+# |<----  Using a Maximum of 50 Characters  ---->|
+
+# Explain why this change is being made
+# |<----   Try to Limit Each Line to 72 Characters   ---->|
+
+# --- COMMIT END ---
+# Type should be one of the following:
+# feat:     A new feature
+# fix:      A bug fix
+# docs:     Documentation only changes
+# style:    Formatting, missing semi colons, etc; no code change
+# refactor: Refactoring production code
+# test:     Adding missing tests
+# chore:    Updating build tasks, package manager configs, etc; no production code change

@@ -37,6 +37,7 @@ public class ClearCommandTest {
         assertNotNull(result.message);
         assertTrue(result.message.contains("Cleared A1"));
         assertEquals(0, board.get(0, 0));
+        assertTrue(result.message.contains("Current grid:"));
     }
 
     @Test

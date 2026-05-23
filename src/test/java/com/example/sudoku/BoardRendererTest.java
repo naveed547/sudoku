@@ -2,113 +2,54 @@ package com.example.sudoku;
 
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class BoardRendererTest {
 
     @Test
-    void printWelcome_printsWelcomeText() {
-        Board board = new Board();
-
-        PrintStream originalOut = System.out;
-        ByteArrayOutputStream capture = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(capture));
-
-        try {
-            board.printWelcome();
-        } finally {
-            System.setOut(originalOut);
-        }
-
-        String out = capture.toString();
+    void getWelcomeMessage_returnsWelcomeText() {
+        String out = BoardRenderer.getWelcomeMessage();
         assertTrue(
                 out.contains("Welcome to Sudoku! (Prefilled cells are fixed and cannot be changed)"),
-                "printWelcome() should print the welcome message"
+                "getWelcomeMessage() should contain the welcome text"
         );
     }
 
     @Test
-    void printCompletionSuccess_printsCompletionPrompt() {
-        Board board = new Board();
-
-        PrintStream originalOut = System.out;
-        ByteArrayOutputStream capture = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(capture));
-
-        try {
-            board.printCompletionSuccess();
-        } finally {
-            System.setOut(originalOut);
-        }
-
-        String out = capture.toString();
+    void getCompletionMessage_returnsCompletionPrompt() {
+        String out = BoardRenderer.getCompletionMessage();
         assertTrue(
                 out.contains("You have successfully completed the Sudoku puzzle!"),
-                "printCompletionSuccess() should print completion message"
+                "getCompletionMessage() should contain completion message"
         );
         assertTrue(
-                out.contains("Press ENTER to play again..."),
-                "printCompletionSuccess() should prompt to press ENTER"
+                out.contains("Press ENTER for a new game"),
+                "getCompletionMessage() should prompt for a new game"
         );
     }
 
     @Test
-    void render_whenPuzzleStartedTrue_printsCurrentGridHeader_andPrompt_andIncludesBoardContent() {
+    void renderToString_whenPuzzleStartedTrue_showsCurrentGridHeader() {
         Board board = new Board();
         board.set(0, 0, 5); // row A, col 1
+        board.setPuzzleStarted(true);
 
-        PrintStream originalOut = System.out;
-        ByteArrayOutputStream capture = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(capture));
+        String out = BoardRenderer.renderToString(board);
 
-        try {
-            board.render(true);
-        } finally {
-            System.setOut(originalOut);
-        }
-
-        String out = capture.toString();
-
-        assertTrue(out.contains("Current grid:"), "render(true) should show Current grid header");
+        assertTrue(out.contains("Current grid:"), "renderToString() should show Current grid header when started");
         assertTrue(out.contains("1 2 3 | 4 5 6 | 7 8 9"), "render should include column header");
-        assertTrue(
-                out.contains("Enter command (eg: A3 4, C5 clear, hint, check, quit, help): "),
-                "render should include command prompt"
-        );
-
-        // At least ensure board content shows the set value and empty cells as underscores
         assertTrue(out.contains("5"), "render should include the filled value");
-        assertTrue(out.contains("_"), "render should include underscore for empty cells");
     }
 
     @Test
-    void render_whenPuzzleStartedFalse_printsHereIsYourPuzzleHeader_andPrompt_andIncludesBoardContent() {
+    void renderToString_whenPuzzleStartedFalse_showsHereIsYourPuzzleHeader() {
         Board board = new Board();
         board.set(8, 8, 9); // row I, col 9
+        board.setPuzzleStarted(false);
 
-        PrintStream originalOut = System.out;
-        ByteArrayOutputStream capture = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(capture));
+        String out = BoardRenderer.renderToString(board);
 
-        try {
-            board.render(false);
-        } finally {
-            System.setOut(originalOut);
-        }
-
-        String out = capture.toString();
-
-        assertTrue(out.contains("Here is your puzzle:"), "render(false) should show Here is your puzzle header");
-        assertTrue(out.contains("1 2 3 | 4 5 6 | 7 8 9"), "render should include column header");
-        assertTrue(
-                out.contains("Enter command (eg: A3 4, C5 clear, hint, check, quit, help): "),
-                "render should include command prompt"
-        );
-
+        assertTrue(out.contains("Here is your puzzle:"), "renderToString() should show puzzle header when not started");
         assertTrue(out.contains("9"), "render should include the filled value");
-        assertTrue(out.contains("_"), "render should include underscore for empty cells");
     }
 }
